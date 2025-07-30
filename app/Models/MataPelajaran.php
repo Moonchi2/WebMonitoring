@@ -11,7 +11,8 @@ class MataPelajaran extends Model
     use HasFactory;
     protected $fillable = [
         'guru_id',
-        'mapel',
+        'nama',
+        'kode'
     ];
 
 public function guru()
