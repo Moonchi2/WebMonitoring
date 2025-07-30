@@ -15,7 +15,7 @@ class GuruController extends Controller
      */
     public function index(Request $request)
     {
-        $type_menu = 'guru';
+        $type_menu = 'kelola';
 
         // ambil data dari tabel guru berdasarkan nama jika terdapat request
         $keyword = trim($request->input('name'));
@@ -56,7 +56,7 @@ class GuruController extends Controller
     {
         // validasi data dari form tambah guru
         $validatedData = $request->validate([
-            'guru_id' => 'required',
+            'user_id' => 'required',
             'no_telepon' => 'required',
         ]);
         // Handle the image upload if present
@@ -68,7 +68,7 @@ class GuruController extends Controller
         }
         //masukan data kedalam tabel gurus
         Guru::create([
-            'guru_id' => $validatedData['guru'],
+            'user_id' => $validatedData['guru'],
             'no_telepon'=> $validatedData['no_telepon'],
 
         ]);
@@ -95,13 +95,13 @@ class GuruController extends Controller
     {
         // Validate the form data
         $request->validate([
-            'guru_id' => 'required',
+            'user_id' => 'required',
             'no_telepon' => 'required',
         ]);
 
         // Update the guru data
         $guru->update([
-            'guru_id' => $request->name,
+            'user_id' => $request->name,
             'no_telepon'=> $request->no_telepon,
         ]);
 

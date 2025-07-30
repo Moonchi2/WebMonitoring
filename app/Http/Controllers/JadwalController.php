@@ -14,7 +14,7 @@ class JadwalController extends Controller
      */
     public function index(Request $request)
     {
-        $type_menu = 'jadwal';
+        $type_menu = 'kelola';
 
         // ambil data dari tabel jadwal berdasarkan nama jika terdapat request
         $keyword = trim($request->input('name'));

@@ -8,7 +8,7 @@
 @endpush
 
 @section('main')
-    @if (Auth::user()->role == 'Admin')
+    {{-- @if (Auth::user()->role == 'Guru') --}}
         <div class="main-content">
             <section class="section">
                 <div class="section-body">
@@ -21,25 +21,25 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Data kegiatans</h4>
+                                    <h4>Data gurus</h4>
                                 </div>
                                 <div class="card-body">
                                     {{-- Filter & Tambah --}}
                                     <div class="mb-3">
                                         <div class="row align-items-end">
                                             <div class="col-md-2 mb-2">
-                                                <a href="{{ route('kegiatan.create') }}" class="btn btn-primary w-100">
+                                                <a href="{{ route('guru.create') }}" class="btn btn-primary w-100">
                                                     <i class="fas fa-plus"></i> Tambah
                                                 </a>
                                             </div>
                                             <div class="col-md-10">
-                                                <form action="{{ route('kegiatan.index') }}" method="GET">
+                                                <form action="{{ route('guru.index') }}" method="GET">
                                                     <div class="form-row row">
                                                         <div class="col-md-2 mb-2">
                                                         </div>
                                                         <div class="col-md-3 mb-2">
                                                             <input type="text" name="name" class="form-control"
-                                                                placeholder="Cari Nama kegiatan" value="{{ request('name') }}">
+                                                                placeholder="Cari Nama guru" value="{{ request('name') }}">
                                                         </div>
                                                         <div class="col-md-1 mb-2">
                                                             <button class="btn btn-primary w-100" type="submit">
@@ -59,43 +59,42 @@
                                             <tr>
                                                 <th style="width: 3%">No</th>
                                                 <th class="text-center">Image</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Role</th>
+                                                <th>User</th>
+                                                <th>No_Telepon</th>
                                                 <th style="width: 5%" class="text-center">Action</th>
                                             </tr>
-                                            @foreach ($kegiatans as $index => $kegiatan)
+                                            @foreach ($gurus as $index => $guru)
                                                 <tr>
                                                     <td>
-                                                        {{ $kegiatans->firstItem() + $index }}
-                                                        {{ $kegiatans->jadwal->guru->user->name}}
+                                                        {{ $gurus->firstItem() + $index }}
+                                                        {{ $gurus->jadwal->matapelajaran->guru->user->name}}
                                                     </td>
                                                     <td class="text-center">
                                                         <img alt="image"
-                                                            src="{{ $kegiatan->image ? asset('img/kegiatan/' . $kegiatan->image) : asset('img/avatar/avatar-1.png') }}"
+                                                            src="{{ $guru->image ? asset('img/guru/' . $guru->image) : asset('img/avatar/avatar-1.png') }}"
                                                             class="rounded-circle" width="35" height="35"
                                                             data-toggle="tooltip" title="avatar">
                                                     </td>
                                                     <td>
-                                                        {{ $kegiatan->name }}
+                                                        {{ $guru->name }}
                                                     </td>
                                                     <td>
-                                                        {{ $kegiatan->email }}
+                                                        {{ $guru->email }}
                                                     </td>
                                                     <td>
-                                                        {{ $kegiatan->role }}
+                                                        {{ $guru->role }}
                                                     </td>
                                                     <td text='text-center'>
                                                         <div class="d-flex justify-content-center">
-                                                            <a href="{{ route('kegiatan.edit', $kegiatan) }}"
+                                                            <a href="{{ route('guru.edit', $guru) }}"
                                                                 class="btn btn-sm btn-icon btn-primary m-1"
                                                                 data-bs-toggle="tooltip" title="Edit"><i
                                                                     class="fas fa-edit"></i></a>
-                                                            <a href="{{ route('kegiatan.show', $kegiatan) }}"
+                                                            <a href="{{ route('guru.show', $guru) }}"
                                                                 class="btn btn-sm btn-icon btn-info m-1"
                                                                 data-bs-toggle="tooltip" title="Lihat"><i
                                                                     class="fas fa-eye"></i></a>
-                                                            <form action="{{ route('kegiatan.destroy', $kegiatan) }}"
+                                                            <form action="{{ route('guru.destroy', $guru) }}"
                                                                 method="post">
                                                                 @csrf
                                                                 @method('delete')
@@ -112,12 +111,12 @@
                                         </table>
                                         <div class="card-footer d-flex justify-content-between">
                                             <span>
-                                                Showing {{ $kegiatans->firstItem() }}
-                                                to {{ $kegiatans->lastItem() }}
-                                                of {{ $kegiatans->total() }} entries
+                                                Showing {{ $gurus->firstItem() }}
+                                                to {{ $gurus->lastItem() }}
+                                                of {{ $gurus->total() }} entries
                                             </span>
                                             <div class="paginate-sm">
-                                                {{ $kegiatans->onEachSide(0)->links() }}
+                                                {{ $gurus->onEachSide(0)->links() }}
                                             </div>
                                         </div>
                                     </div>
@@ -128,11 +127,11 @@
                 </div>
             </section>
         </div>
-    @else
+    {{-- @else
         <div class="alert alert-danger">
             User role Anda tidak mendapatkan izin.
         </div>
-    @endif
+    @endif --}}
 
 @endsection
 

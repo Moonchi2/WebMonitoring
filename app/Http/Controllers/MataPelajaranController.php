@@ -13,7 +13,7 @@ class MataPelajaranController extends Controller
      */
     public function index(Request $request)
     {
-        $type_menu = 'matapelajaran';
+        $type_menu = 'kelola';
 
         // ambil data dari tabel matapelajaran berdasarkan nama jika terdapat request
         $keyword = trim($request->input('name'));

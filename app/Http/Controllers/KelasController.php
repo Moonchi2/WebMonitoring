@@ -13,7 +13,7 @@ class KelasController extends Controller
      */
     public function index(Request $request)
     {
-        $type_menu = 'kelas';
+        $type_menu = 'kelola';
 
         // ambil data dari tabel kelas berdasarkan nama jika terdapat request
         $keyword = trim($request->input('name'));
@@ -33,7 +33,7 @@ class KelasController extends Controller
         $kelass->appends(['name' => $keyword, 'role' => $role]);
 
         // arahkan ke file pages/kelass/index.blade.php
-        return view('pages.kelass.index', compact('type_menu', 'kelass'));
+        return view('pages.kelas.index', compact('type_menu', 'kelass'));
     }
 
     /**

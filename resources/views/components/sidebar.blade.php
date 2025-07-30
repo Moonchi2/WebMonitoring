@@ -20,13 +20,35 @@
                     </a>
                 </li>
 
+                <li class="menu-header">Master Data</li>
+                <li class="nav-item dropdown {{ $type_menu === 'kelola' ? 'active' : '' }}">
+                    <a href="#" class="nav-link has-dropdown">
+                        <i class="fas fa-clipboard-list"></i><span>Kelola Kegiatan</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="{{ Request::is('guru*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('guru.index') }}">Guru</a>
+                        </li>
+                        <li class="{{ Request::is('jadwal*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('jadwal.index') }}">Jadwal</a>
+                        </li>
+                        <li class="{{ Request::is('kelas*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{route('kelas.index')}}">Kelas</a>
+                        </li>
+
+                        <li class="{{ Request::is('matapelajaran*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{route('matapelajaran.index')}}">Mata Pelajaran</a>
+                        </li>
+                    </ul>
+                </li>
+
                 {{-- @if (Auth::user()->role == 'Guru') --}}
-                    <li class="nav-item dropdown {{ $type_menu === 'kegiatan' ? 'active' : '' }}">
-                        <a href="{{ route('kegiatan.index') }}" class="nav-link ha">
-                            <i class="fas fa-user-cog"></i><span>kegiatan</span>
-                        </a>
-                    </li>
-                    {{-- @endif --}}
+                <li class="nav-item dropdown {{ $type_menu === 'santris' ? 'active' : '' }}">
+                    <a href="{{ route('santris.index') }}" class="nav-link ha">
+                        <i class="fas fa-user-cog"></i><span>Kelola Santri</span>
+                    </a>
+                </li>
+                {{-- @endif --}}
 
                 <li class="menu-header">Master Data</li>
                 {{-- Users (Admin only) --}}

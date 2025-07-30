@@ -34,7 +34,7 @@ class KegiatanController extends Controller
         $kegiatans->appends(['name' => $keyword, 'role' => $role]);
 
         // arahkan ke file pages/kegiatans/index.blade.php
-        return view('pages.kegiatans.index', compact('type_menu', 'kegiatans'));
+        return view('pages.kegiatan.index', compact('type_menu', 'kegiatans'));
     }
 
     /**
