@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Users')
+@section('title', 'Santri')
 
 @push('style')
     <!-- CSS Libraries -->
@@ -21,7 +21,7 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Data santris</h4>
+                                    <h4>Data Santri</h4>
                                 </div>
                                 <div class="card-body">
                                     {{-- Filter & Tambah --}}

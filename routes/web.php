@@ -29,5 +29,5 @@ Route::middleware(['auth'])->group(function () {
   Route::resource('jadwal',JadwalController::class);
   Route::resource('kelas',KelasController::class);
   Route::resource('matapelajaran',MataPelajaranController::class);
-  Route::resource('santris',SantriController::class);
+  Route::resource('santri',SantriController::class);
 });
