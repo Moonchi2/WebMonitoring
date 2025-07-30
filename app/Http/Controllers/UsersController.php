@@ -143,13 +143,5 @@ class UsersController extends Controller
         $user->delete();
         return Redirect::route('user.index')->with('success', 'User '. $user->name . ' berhasil di hapus.');
     }
-    public function show($id)
-    {
-        $type_menu = 'user';
-        $user = User::find($id);
-
-        // arahkan ke file pages/users/edit
-        return view('pages.users.show', compact('user', 'type_menu'));
-    }
 }
 

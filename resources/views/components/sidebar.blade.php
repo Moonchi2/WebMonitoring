@@ -60,7 +60,7 @@
                 </li>
 
                 <li class="nav-item dropdown {{ $type_menu === 'santris' ? 'active' : '' }}">
-                    <a href="{{ route('santris.index') }}" class="nav-link">
+                    <a href="{{ route('santri.index') }}" class="nav-link">
                         <i class="fas fa-user-graduate"></i><span>Kelola Santri</span>
                     </a>
                 </li>

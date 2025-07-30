@@ -50,43 +50,38 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            <!-- Name -->
                                             <div class="form-group col-md-6 mb-3">
                                                 <label for="name" class="form-label">Name</label>
                                                 <input type="text"
                                                     class="form-control @error('name') is-invalid @enderror" id="name"
                                                     name="name" value="{{ old('name', $user->name) }}"
                                                     placeholder="Masukkan Nama" required>
-                                                @if ($errors->has('name'))
-                                                    <div class="invalid-feedback">{{ $errors->first('name') }}</div>
-                                                @endif
+                                                @error('name')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
-                                            <!-- Email -->
                                             <div class="form-group col-md-6 mb-3">
                                                 <label for="email" class="form-label">Email</label>
                                                 <input type="email"
                                                     class="form-control @error('email') is-invalid @enderror" id="email"
                                                     name="email" value="{{ old('email', $user->email) }}"
                                                     placeholder="Masukkan Email" required>
-                                                @if ($errors->has('email'))
-                                                    <div class="invalid-feedback">{{ $errors->first('email') }}</div>
-                                                @endif
+                                                @error('email')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
-
                                         <div class="row">
-                                            <!-- Password -->
                                             <div class="form-group col-md-6 mb-3">
                                                 <label for="password" class="form-label">Password</label>
                                                 <input type="password"
                                                     class="form-control @error('password') is-invalid @enderror"
                                                     id="password" name="password"
                                                     placeholder="Masukkan Password Baru (Opsional)">
-                                                @if ($errors->has('password'))
-                                                    <div class="invalid-feedback">{{ $errors->first('password') }}</div>
-                                                @endif
+                                                @error('password')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
-                                            <!-- Role Selection -->
                                             <div class="form-group col-md-6 mb-3">
                                                 <label for="role" class="form-label">Role</label>
                                                 <select id="role" class="form-control" name="role" required
@@ -95,39 +90,28 @@
                                                     <option value="Admin"
                                                         {{ old('role', $user->role) == 'Admin' ? 'selected' : '' }}>Admin
                                                     </option>
-                                                    <option value="PLPP"
-                                                        {{ old('role', $user->role) == 'Customer' ? 'selected' : '' }}>
-                                                        Customer
+                                                    <option value="Guru"
+                                                        {{ old('role', $user->role) == 'Guru' ? 'selected' : '' }}>Guru
                                                     </option>
+                                                    <option value="Orang Tua"
+                                                        {{ old('role', $user->role) == 'Orang Tua' ? 'selected' : '' }}>
+                                                        Orang Tua</option>
                                                 </select>
-                                                @if ($errors->has('role'))
-                                                    <div class="invalid-feedback">{{ $errors->first('role') }}</div>
-                                                @endif
+                                                @error('role')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
 
                                         <div class="row">
-                                            <!-- No Handphone -->
-                                            <div class="form-group col-md-6 mb-3">
-                                                <label for="no_handphone" class="form-label">No Handphone</label>
-                                                <input type="text"
-                                                    class="form-control @error('no_handphone') is-invalid @enderror"
-                                                    id="no_handphone" name="no_handphone"
-                                                    value="{{ old('no_handphone', $user->no_handphone) }}"
-                                                    placeholder="Masukkan No Handphone Aktif (62821xx)" required>
-                                                @if ($errors->has('no_handphone'))
-                                                    <div class="invalid-feedback">{{ $errors->first('no_handphone') }}</div>
-                                                @endif
-                                            </div>
-                                            <!-- Image -->
-                                            <div class="form-group col-md-6">
+                                            <div class="form-group col-md-12">
                                                 <label for="image" class="form-label">Image</label>
                                                 <input type="file"
                                                     class="form-control @error('image') is-invalid @enderror" id="image"
                                                     name="image" accept="image/*">
-                                                @if ($errors->has('image'))
-                                                    <div class="invalid-feedback">{{ $errors->first('image') }}</div>
-                                                @endif
+                                                @error('image')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                                 <div id="image-preview">
                                                     @if ($user->image)
                                                         <img src="{{ asset('img/user/' . $user->image) }}"
@@ -139,7 +123,7 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <button type="submit" class="btn btn-primary mt-2">Ubah</button>
+                                            <button type="submit" class="btn btn-primary mt-2">Update</button>
                                         </div>
                                     </div>
                                 </div>
@@ -150,9 +134,6 @@
             </section>
         </div>
     @else
-        <div class="alert alert-danger">
-            User role Anda tidak mendapatkan izin.
-        </div>
     @endif
 
 @endsection

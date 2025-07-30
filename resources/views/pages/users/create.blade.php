@@ -1,220 +1,156 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda')
+@section('title', 'Users')
 
-@push('styles')
-    {{-- CSS Khusus untuk mengecilkan ukuran kotak kalender --}}
+@push('style')
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="{{ asset('library/selectric/public/selectric.css') }}">
     <style>
-        .table-calendar th,
-        .table-calendar td {
-            padding: 0.2rem; /* Mengurangi jarak/ukuran kotak */
-            font-size: 0.78rem;     /* Ukuran font tetap */
+        #image-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ddd;
+            padding: 10px;
+            width: 200px;
+            height: 200px;
+            margin-top: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
         }
     </style>
 @endpush
 
 @section('main')
-    <div class="main-content">
-        <section class="section">
-            {{-- Header Sambutan --}}
-           <div class="section-header" style="background-color: #f6f6f6; border-radius: 8px; padding: 15px 25px; margin-bottom: 30px;">
-                <div class="d-flex justify-content-between w-100 align-items-center">
-                    <div>
-                        <h4 class="mb-0">Selamat Datang, {{ Auth::user()->name }}!</h4>
-                        <p class="mb-0 text-muted">Anda adalah Admin Pondok Pesantren Darul Iman</p>
-                    </div>
-                    <div>
-                        <div class="badge badge-primary">Admin</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-body">
-                {{-- 🔹 Statistik Count --}}
-                <div class="row">
-                    {{-- Card Total Santri --}}
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                        <div class="card">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-users fa-lg"></i>
-                                </div>
-                                <div>
-                                    <div class="text-muted">Total Santri</div>
-                                    <div class="font-weight-bold" style="font-size: 1.5rem;">28</div>
-                                </div>
-                            </div>
+    @if (Auth::user()->role == 'Admin')
+        <div class="main-content">
+            <section class="section">
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-12">
+                            @include('layouts.alert')
                         </div>
                     </div>
-                    {{-- Card Total Wali --}}
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                        <div class="card">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-user-graduate fa-lg"></i>
-                                </div>
-                                <div>
-                                    <div class="text-muted">Total Wali</div>
-                                    <div class="font-weight-bold" style="font-size: 1.5rem;">10</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Card Total Kegiatan --}}
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                        <div class="card">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-book-open fa-lg"></i>
-                                </div>
-                                <div>
-                                    <div class="text-muted">Total Kegiatan</div>
-                                    <div class="font-weight-bold" style="font-size: 1.5rem;">14</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    {{-- 🔹 Tabel Santri --}}
-                    <div class="col-lg-8 col-md-12">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h4>Santri</h4>
-                                <div class="card-header-form">
-                                    <form>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Search">
-                                            <div class="input-group-btn">
-                                                <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                    <div class="row">
+                        <div class="col-12">
+                            <form action="{{ route('user.store') }}" enctype="multipart/form-data" method="POST">
+                                @csrf
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>Tambah User</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="form-group col-md-6 mb-3">
+                                                <label for="name" class="form-label">Name</label>
+                                                <input type="text" class="form-control" id="name" name="name"
+                                                    value="{{ old('name') }}" placeholder="Masukkan Nama" required>
+                                                @error('name')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="form-group col-md-6 mb-3">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email"
+                                                    class="form-control @error('email') is-invalid @enderror" id="email"
+                                                    name="email" value="{{ old('email') }}" placeholder="Masukkan Email"
+                                                    required>
+                                                @error('email')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
-                                    </form>
+                                        <div class="row">
+                                            <div class="form-group col-md-6 mb-3">
+                                                <label for="password" class="form-label">Password</label>
+                                                <input type="password"
+                                                    class="form-control @error('password') is-invalid @enderror"
+                                                    id="password" name="password"
+                                                    placeholder="Masukkan Password 8 Karakter" required>
+                                                @error('password')
+                                                    <div class="invalid-feedback">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
+                                            </div>
+                                            <div class="form-group col-md-6 mb-3">
+                                                <label for="role" class="form-label">Role</label>
+                                                <select id="role" class="form-control" name="role" required
+                                                    onchange="toggleAdditionalInputs()">
+                                                    <option value="">Pilih Status</option>
+                                                    <option value="Admin">Admin</option>
+                                                    <option value="Guru">Guru</option>
+                                                    <option value="Orang Tua">Orang Tua</option>
+                                                </select>
+                                                @error('role')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-md-12">
+                                                <label for="image" class="form-label">Image</label>
+                                                <input type="file"
+                                                    class="form-control @error('image') is-invalid @enderror" id="image"
+                                                    name="image" accept="image/*" >
+                                                @error('image')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                                <div id="image-preview">
+                                                    <span>Preview Image</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-primary mt-2">Simpan</button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Nama</th>
-                                                <th>Tingkatan</th>
-                                                <th>Aktifasi</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php
-                                                $santriData = [
-                                                    ['nama' => 'Nama', 'tingkatan' => 'VII', 'aktifasi' => 'Mengaji', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'IV', 'aktifasi' => 'Menghafal', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'III', 'aktifasi' => 'Mengaji', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'VI', 'aktifasi' => 'Olah raga', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'V', 'aktifasi' => 'Mengaji', 'status' => 'Aktif'],
-                                                ];
-                                            @endphp
-                                            @foreach ($santriData as $santri)
-                                            <tr>
-                                                <td>
-                                                    <img alt="image" src="{{ asset('img/avatar/avatar-1.png') }}" class="rounded-circle" width="35" data-toggle="tooltip" title="{{ $santri['nama'] }}">
-                                                    <span class="ml-2">{{ $santri['nama'] }}</span>
-                                                </td>
-                                                <td>{{ $santri['tingkatan'] }}</td>
-                                                <td>{{ $santri['aktifasi'] }}</td>
-                                                <td><div class="badge badge-success">{{ $santri['status'] }}</div></td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- 🔹 Kalender Statis --}}
-                    <div class="col-lg-4 col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Kalender</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <a href="#" class="text-primary"><i class="fas fa-chevron-left"></i></a>
-                                    <h6 class="mb-0 font-weight-bold">Agustus 2025</h6>
-                                    <a href="#" class="text-primary"><i class="fas fa-chevron-right"></i></a>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered text-center table-calendar">
-                                        <thead>
-                                            <tr>
-                                                <th>Sen</th>
-                                                <th>Sel</th>
-                                                <th>Rab</th>
-                                                <th>Kam</th>
-                                                <th>Jum</th>
-                                                <th>Sab</th>
-                                                <th>Min</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="text-muted"></td>
-                                                <td class="text-muted"></td>
-                                                <td class="text-muted"></td>
-                                                <td class="text-muted"></td>
-                                                <td>1</td>
-                                                <td>2</td>
-                                                <td>3</td>
-                                            </tr>
-                                            <tr>
-                                                <td>4</td>
-                                                <td>5</td>
-                                                <td>6</td>
-                                                <td>7</td>
-                                                <td>8</td>
-                                                <td>9</td>
-                                                <td>10</td>
-                                            </tr>
-                                            <tr>
-                                                <td>11</td>
-                                                <td>12</td>
-                                                <td>13</td>
-                                                <td>14</td>
-                                                <td>15</td>
-                                                <td>16</td>
-                                                <td>17</td>
-                                            </tr>
-                                            <tr>
-                                                <td>18</td>
-                                                <td>19</td>
-                                                <td>20</td>
-                                                <td>21</td>
-                                                <td>22</td>
-                                                <td>23</td>
-                                                <td>24</td>
-                                            </tr>
-                                            <tr>
-                                                <td>25</td>
-                                                <td>26</td>
-                                                <td>27</td>
-                                                <td>28</td>
-                                                <td>29</td>
-                                                <td>30</td>
-                                                <td>31</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </div>
+            </section>
+        </div>
+    @else
+    @endif
+
 @endsection
 
 @push('scripts')
-    {{-- Tidak ada script khusus yang dibutuhkan untuk halaman ini --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('image');
+            const imagePreview = document.getElementById('image-preview');
+
+            // Preview image when file is selected
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please upload a valid image file.');
+                        this.value = '';
+                        imagePreview.innerHTML = `<span>Preview Image</span>`;
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.innerHTML =
+                            `<img src="${event.target.result}" alt="Image Preview">`;
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.innerHTML = `<span>Preview Image</span>`;
+                }
+            });
+        });
+    </script>
 @endpush
