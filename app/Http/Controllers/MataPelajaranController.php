@@ -2,115 +2,92 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
 use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
-use Redirect;
+use Illuminate\Support\Facades\Redirect;
 
 class MataPelajaranController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $type_menu = 'kelola';
+        $type_menu = 'sekolah';
+        $keyword = trim($request->input('nama'));
 
-        // ambil data dari tabel matapelajaran berdasarkan nama jika terdapat request
-        $keyword = trim($request->input('name'));
-        $role = $request->input('role');
-
-        // Query matapelajarans dengan filter pencarian dan role
-        $matapelajarans = MataPelajaran::when($keyword, function ($query, $name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        })
-            ->when($role, function ($query, $role) {
-                $query->where('role', $role);
+        $mapel = MataPelajaran::with('guru.user')
+            ->when($keyword, function ($query, $keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('nama', 'like', '%' . $keyword . '%')
+                        ->orWhereHas('guru.user', function ($sub) use ($keyword) {
+                            $sub->where('name', 'like', '%' . $keyword . '%');
+                        });
+                });
             })
             ->latest()
             ->paginate(10);
 
-        // Tambahkan parameter query ke pagination
-        $matapelajarans->appends(['name' => $keyword, 'role' => $role]);
+        $mapel->appends(['nama' => $keyword]);
 
-        // arahkan ke file pages/matapelajarans/index.blade.php
-        return view('pages.matapelajarans.index', compact('type_menu', 'matapelajarans'));
+        return view('pages.mapel.index', compact('type_menu', 'mapel'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $type_menu = 'matapelajaran';
+        $type_menu = 'sekolah';
+        $gurus = Guru::with('user')->get();
 
-        // arahkan ke file pages/matapelajarans/create.blade.php
-        return view('pages.matapelajarans.create', compact('type_menu'));
+        return view('pages.mapel.create', compact('type_menu', 'gurus'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // validasi data dari form tambah matapelajaran
-        $validatedData = $request->validate([
-            'guru_id' => 'required',
-            'mata_pelajaran' => 'required',
-        ]);
-    
-        //masukan data kedalam tabel matapelajarans
-        matapelajaran::create([
-            'guru_id' => $validatedData['guru'],
-            'mata_pelajaran' => $request->matapelajaran,
-        ]);
-
-        //jika proses berhsil arahkan kembali ke halaman matapelajarans dengan status success
-        return Redirect::route('matapelajaran.index')->with('success', 'matapelajaran ' . $validatedData['name'] . ' berhasil ditambah.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function edit(matapelajaran $matapelajaran)
-    {
-        $type_menu = 'matapelajaran';
-
-        // arahkan ke file pages/matapelajarans/edit
-        return view('pages.matapelajarans.edit', compact('matapelajaran', 'type_menu'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function update(Request $request, matapelajaran $matapelajaran)
-    {
-        // Validate the form data
         $request->validate([
-            'nama' => 'required',
+            'guru_id' => 'required|exists:gurus,id',
+            'nama' => 'required|string|max:255',
+            'kode' => 'required|string|max:50|unique:mapels,kode',
         ]);
 
-        // Update the matapelajaran data
-        $matapelajaran->update([
+        $mapel = MataPelajaran::create([
+            'guru_id' => $request->guru_id,
             'nama' => $request->nama,
+            'kode' => $request->kode,
         ]);
 
-        return Redirect::route('matapelajaran.index')->with('success', 'matapelajaran ' . $matapelajaran->name . ' berhasil diubah.');
+        return Redirect::route('mapel.index')
+            ->with('success', 'Mata Pelajaran ' . $mapel->nama . ' berhasil ditambahkan.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(matapelajaran $matapelajaran)
+    public function edit(MataPelajaran $mapel)
     {
-        $matapelajaran->delete();
-        return Redirect::route('matapelajaran.index')->with('success', 'matapelajaran '. $matapelajaran->name . ' berhasil di hapus.');
-    }
-    public function show($id)
-    {
-        $type_menu = 'matapelajaran';
-        $matapelajaran = matapelajaran::find($id);
+        $type_menu = 'sekolah';
+        $gurus = Guru::with('user')->get();
 
-        // arahkan ke file pages/matapelajarans/edit
-        return view('pages.matapelajarans.show', compact('matapelajaran', 'type_menu'));
+        return view('pages.mapel.edit', compact('type_menu', 'mapel', 'gurus'));
+    }
+
+    public function update(Request $request, MataPelajaran $mapel)
+    {
+        $request->validate([
+            'guru_id' => 'required|exists:gurus,id',
+            'nama' => 'required|string|max:255',
+            'kode' => 'required|string|max:50|unique:mapels,kode,' . $mapel->id,
+        ]);
+
+        $mapel->update([
+            'guru_id' => $request->guru_id,
+            'nama' => $request->nama,
+            'kode' => $request->kode,
+        ]);
+
+        return Redirect::route('mapel.index')
+            ->with('success', 'Mata Pelajaran ' . $mapel->nama . ' berhasil diubah.');
+    }
+
+    public function destroy(MataPelajaran $mapel)
+    {
+        $mapel->delete();
+
+        return Redirect::route('mapel.index')
+            ->with('success', 'Mata Pelajaran ' . $mapel->nama . ' berhasil dihapus.');
     }
 }

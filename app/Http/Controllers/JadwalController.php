@@ -2,130 +2,139 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
 use App\Models\Jadwal;
-use Hash;
+use App\Models\Kelas;
+use App\Models\Mapel;
+use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
-use Redirect;
+use Illuminate\Support\Facades\Redirect;
 
 class JadwalController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $type_menu = 'kelola';
+        $type_menu = 'sekolah';
 
-        // ambil data dari tabel jadwal berdasarkan nama jika terdapat request
-        $keyword = trim($request->input('name'));
-        $role = $request->input('role');
+        $keyword = trim($request->input('nama'));
+        $filterKelas = $request->kelas_id;
+        $filterGuru = $request->guru_id;
+        $filterHari = $request->hari;
 
-        // Query jadwals dengan filter pencarian dan role
-        $jadwals = Jadwal::when($keyword, function ($query, $name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        })
-            ->when($role, function ($query, $role) {
-                $query->where('role', $role);
+        $jadwal = Jadwal::with(['guru.user', 'kelas', 'mapel'])
+            ->when($keyword, function ($query, $keyword) {
+                $query->whereHas('guru.user', function ($q) use ($keyword) {
+                    $q->where('name', 'like', '%' . $keyword . '%');
+                })->orWhereHas('mapel', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', '%' . $keyword . '%');
+                });
+            })
+            ->when($filterKelas, function ($query, $filterKelas) {
+                $query->where('kelas_id', $filterKelas);
+            })
+            ->when($filterGuru, function ($query, $filterGuru) {
+                $query->where('guru_id', $filterGuru);
+            })
+            ->when($filterHari, function ($query, $filterHari) {
+                $query->where('hari', $filterHari);
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->appends([
+                'nama' => $keyword,
+                'kelas_id' => $filterKelas,
+                'guru_id' => $filterGuru,
+                'hari' => $filterHari,
+            ]);
 
-        // Tambahkan parameter query ke pagination
-        $jadwals->appends(['name' => $keyword, 'role' => $role]);
+        // Data untuk filter dropdown
+        $kelasList = Kelas::all();
+        $guruList = Guru::with('user')->get();
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-        // arahkan ke file pages/jadwals/index.blade.php
-        return view('pages.jadwals.index', compact('type_menu', 'jadwals'));
+        return view('pages.jadwal.index', compact(
+            'type_menu',
+            'jadwal',
+            'kelasList',
+            'guruList',
+            'hariList',
+            'keyword',
+            'filterKelas',
+            'filterGuru',
+            'filterHari'
+        ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $type_menu = 'jadwal';
+        $type_menu = 'sekolah';
+        $guru = Guru::with('user')->get();
+        $mapel = MataPelajaran::all();
+        $kelas = Kelas::all();
 
-        // arahkan ke file pages/jadwals/create.blade.php
-        return view('pages.jadwals.create', compact('type_menu'));
+        return view('pages.jadwal.create', compact('type_menu', 'guru', 'mapel', 'kelas'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // validasi data dari form tambah jadwal
-        $validatedData = $request->validate([
-            'guru_id' => 'required',
-            'mapel_id' => 'required',
-            'hari' => 'required',
-            'jam_mulai' => 'nullable',
-            'jam_selesai' =>'nullable',
-        ]);
-    
-        //masukan data kedalam tabel jadwals
-        jadwal::create([
-            'guru_id' => $validatedData['name'],
-            'mapel_id' => $validatedData['email'],
-            'hari' => $validatedData['password'],
-            'jam_mulai' => $validatedData['role'],
-            'jam_selesai'=> $validatedData['no_handphone'],
-        ]);
-
-        //jika proses berhsil arahkan kembali ke halaman jadwals dengan status success
-        return Redirect::route('jadwal.index')->with('success', 'jadwal ' . $validatedData['name'] . ' berhasil ditambah.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function edit(jadwal $jadwal)
-    {
-        $type_menu = 'jadwal';
-
-        // arahkan ke file pages/jadwals/edit
-        return view('pages.jadwals.edit', compact('jadwal', 'type_menu'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function update(Request $request, jadwal $jadwal)
-    {
-        // Validate the form data
         $request->validate([
-            'guru_id' => 'required',
-            'mapel_id' => 'required',
+            'guru_id' => 'required|exists:gurus,id',
+            'kelas_id' => 'required|exists:kelas,id',
+            'mapel_id' => 'required|exists:mapels,id',
             'hari' => 'required',
-            'jam_mulai' => 'nullable',
-            'jam_selesai' =>'nullable',
+            'jam_mulai' => 'required',
+            'jam_selesai' => 'required|after:jam_mulai',
         ]);
 
-        // Update the jadwal data
-        $jadwal->update([
-            'guru_id' => $request->guruid,
-            'mapel_id' => $request->mapelid,
-            'hari' => $request->hari,
-            'jam_mulai'=> $request->jam_mulai,
-            'jam_selesai'=> $request->jam_selesai,
-        ]);
+        $jadwal = Jadwal::create($request->only([
+            'guru_id',
+            'kelas_id',
+            'mapel_id',
+            'hari',
+            'jam_mulai',
+            'jam_selesai'
+        ]));
 
-        return Redirect::route('jadwal.index')->with('success', 'jadwal ' . $jadwal->name . ' berhasil diubah.');
+        return Redirect::route('jadwal.index')->with('success', 'Jadwal pelajaran untuk kelas ' . $jadwal->kelas->nama . ' berhasil ditambahkan.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(jadwal $jadwal)
+    public function edit(Jadwal $jadwal)
+    {
+        $type_menu = 'sekolah';
+        $guru = Guru::with('user')->get();
+        $mapel = MataPelajaran::all();
+        $kelas = Kelas::all();
+
+        return view('pages.jadwal.edit', compact('type_menu', 'jadwal', 'guru', 'mapel', 'kelas'));
+    }
+
+    public function update(Request $request, Jadwal $jadwal)
+    {
+        $request->validate([
+            'guru_id' => 'required|exists:gurus,id',
+            'kelas_id' => 'required|exists:kelas,id',
+            'mapel_id' => 'required|exists:mapels,id',
+            'hari' => 'required',
+            'jam_mulai' => 'required',
+            'jam_selesai' => 'required|after:jam_mulai',
+        ]);
+
+        $jadwal->update($request->only([
+            'guru_id',
+            'kelas_id',
+            'mapel_id',
+            'hari',
+            'jam_mulai',
+            'jam_selesai'
+        ]));
+
+        return Redirect::route('jadwal.index')->with('success', 'Jadwal pelajaran untuk kelas ' . $jadwal->kelas->nama . ' berhasil diubah.');
+    }
+
+    public function destroy(Jadwal $jadwal)
     {
         $jadwal->delete();
-        return Redirect::route('jadwal.index')->with('success', 'jadwal '. $jadwal->name . ' berhasil di hapus.');
-    }
-    public function show($id)
-    {
-        $type_menu = 'jadwal';
-        $jadwal = jadwal::find($id);
 
-        // arahkan ke file pages/jadwals/edit
-        return view('pages.jadwals.show', compact('jadwal', 'type_menu'));
+        return Redirect::route('jadwal.index')->with('success', 'Jadwal pelajaran untuk kelas ' . $jadwal->kelas->nama . ' berhasil dihapus.');
     }
 }

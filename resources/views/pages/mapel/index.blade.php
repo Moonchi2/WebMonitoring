@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Data Kelas')
+@section('title', 'Data Mapel')
 
 @push('style')
-    <!-- Tambahkan jika ada CSS tambahan -->
+    <!-- Tambahkan CSS tambahan jika diperlukan -->
 @endpush
 
 @section('main')
@@ -11,15 +11,15 @@
         <section class="section">
             @include('layouts.alert')
             <div class="section-header">
-                <h1>Data Kelas</h1>
+                <h1>Data Mata Pelajaran</h1>
             </div>
 
             <div class="section-body">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <form method="GET" action="{{ route('kelas.index') }}" class="form-inline">
+                        <form method="GET" action="{{ route('mapel.index') }}" class="form-inline">
                             <div class="input-group">
-                                <input type="text" name="nama" class="form-control" placeholder="Cari nama kelas"
+                                <input type="text" name="nama" class="form-control" placeholder="Cari nama guru"
                                     value="{{ request('nama') }}">
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" type="submit">
@@ -29,8 +29,8 @@
                             </div>
                         </form>
 
-                        <a href="{{ route('kelas.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Tambah Kelas
+                        <a href="{{ route('mapel.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Mapel
                         </a>
                     </div>
 
@@ -39,36 +39,32 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Nama Kelas</th>
-                                    <th>Status</th>
-                                    <th>Latitude</th>
-                                    <th>Longitude</th>
-                                    <th>Radius</th>
+                                    <th>Nama Mapel</th>
+                                    <th>Kode</th>
+                                    <th>Nama Guru</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($kelas as $index => $item)
+                                @forelse ($mapel as $index => $item)
                                     <tr>
-                                        <td>{{ $kelas->firstItem() + $index }}</td>
+                                        <td>{{ $mapel->firstItem() + $index }}</td>
                                         <td>{{ $item->nama }}</td>
-                                        <td>{{ $item->status }}</td>
-                                        <td>{{ $item->latitude }}</td>
-                                        <td>{{ $item->longitude }}</td>
-                                        <td>{{ $item->radius }}</td>
+                                        <td>{{ $item->kode }}</td>
+                                        <td>{{ $item->guru->user->name ?? '-' }}</td>
                                         <td>
                                             <div class="d-flex justify-content-center">
-                                                <a href="{{ route('kelas.edit', $item) }}"
+                                                <a href="{{ route('mapel.edit', $item) }}"
                                                     class="btn btn-sm btn-icon btn-primary m-1" data-toggle="tooltip"
-                                                    title="Edit Kelas">
+                                                    title="Edit Mapel">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
 
-                                                <form action="{{ route('kelas.destroy', $item) }}" method="POST">
+                                                <form action="{{ route('mapel.destroy', $item) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-sm btn-icon m-1 btn-danger confirm-delete"
-                                                        data-toggle="tooltip" title="Hapus Kelas">
+                                                        data-toggle="tooltip" title="Hapus Mapel">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -77,7 +73,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center">Tidak ada data kelas.</td>
+                                        <td colspan="5" class="text-center">Tidak ada data mapel.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -86,11 +82,11 @@
 
                     <div class="card-footer d-flex justify-content-between">
                         <div>
-                            Menampilkan {{ $kelas->firstItem() }} - {{ $kelas->lastItem() }} dari {{ $kelas->total() }}
+                            Menampilkan {{ $mapel->firstItem() }} - {{ $mapel->lastItem() }} dari {{ $mapel->total() }}
                             data
                         </div>
                         <div>
-                            {{ $kelas->withQueryString()->links() }}
+                            {{ $mapel->withQueryString()->links() }}
                         </div>
                     </div>
                 </div>

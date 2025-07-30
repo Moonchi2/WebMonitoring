@@ -2,129 +2,178 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kelas;
+use App\Models\OrangTua;
 use App\Models\Santri;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Redirect;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 
 class SantriController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $type_menu = 'Santri';
+        $type_menu = 'santri';
 
-        // ambil data dari tabel santri berdasarkan nama jika terdapat request
-        $keyword = trim($request->input('name'));
-        $role = $request->input('role');
+        $keyword = trim($request->input('search'));
+        $kelasId = $request->input('kelas'); // kelas yang dipilih
 
-        // Query santris dengan filter pencarian dan role
-        $santris = Santri::when($keyword, function ($query, $name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        })
-            ->when($role, function ($query, $role) {
-                $query->where('role', $role);
-            })
-            ->latest()
-            ->paginate(10);
+        $query = Santri::with(['user', 'kelas']);
 
-        // Tambahkan parameter query ke pagination
-        $santris->appends(['name' => $keyword, 'role' => $role]);
+        if ($keyword) {
+            $query->whereHas('user', function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%");
+            });
+        }
 
-        // arahkan ke file pages/santris/index.blade.php
-        return view('pages.santris.index', compact('type_menu', 'santris'));
+        if ($kelasId) {
+            $query->where('kelas_id', $kelasId);
+        }
+
+        $siswas = $query->latest()->paginate(10);
+        $siswas->appends($request->only(['search', 'kelas']));
+
+        $listKelas = Kelas::all();
+
+        return view('pages.santri.index', [
+            'type_menu' => $type_menu,
+            'siswas' => $siswas,
+            'listKelas' => $listKelas,
+            'kelasId' => $kelasId,
+            'keyword' => $keyword
+        ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $type_menu = 'santri';
+        $listKelas = Kelas::all();
+        $listUser = User::where('role', 'Orang Tua')->get();
 
-        // arahkan ke file pages/santris/create.blade.php
-        return view('pages.santris.create', compact('type_menu'));
+        return view('pages.santri.create', [
+            'type_menu' => $type_menu,
+            'listKelas' => $listKelas,
+            'listUser' => $listUser
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // validasi data dari form tambah santri
-        $validatedData = $request->validate([
-            'tanggal_lahir' => 'required',
-            'jenis_kelamin' => 'required',
-            'nis' => 'required',
+        $request->validate([
+            'user_id' => 'required|unique:orangtuas,user_id',
             'kelas_id' => 'required',
-            'tanggal_masuk' =>'required',
-        ]);
-    
-        //masukan data kedalam tabel santris
-        santri::create([
-            'tanggal_lahir' => $validatedData['tanggal_lahir'],
-            'jenis_kelamin' => $validatedData['jenis_kelamin'],
-            'nis' => $validatedData['nis'],
-            'kelas_id' => $validatedData['kelas_id'],
-            'tanggal_masuk'=> $validatedData['tanggal_masuk'],
+            'tanggal_lahir' => 'required|date',
+            'nis' => 'required|unique:santris,nis',
+            'jenis_kelamin' => 'required',
+            'tanggal_masuk' => 'required',
+            'alamat' => 'required',
+            'no_telepon' => [
+                'required',
+                'regex:/^628/',
+            ],
         ]);
 
-        //jika proses berhsil arahkan kembali ke halaman santris dengan status success
-        return Redirect::route('santri.index')->with('success', 'santri ' . $validatedData['name'] . ' berhasil ditambah.');
+        try {
+            $santri = Santri::create([
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'kelas_id' => $request->kelas_id,
+                'nis' => $request->nis,
+                'nisn' => $request->nisn,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'no_telepon' => $request->no_telepon,
+            ]);
+
+            OrangTua::create([
+                'user_id' => $request->user_id,
+                'santri_id' => $santri->id,
+                'alamat' => $request->alamat,
+                'no_telepon' => $request->no_telepon_ortu,
+            ]);
+
+            return redirect()->route('santri.index')->with('success', 'Data santri berhasil disimpan');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal menyimpan data: ' . $e->getMessage()])->withInput();
+        }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function edit(santri $santri)
+    public function edit(Santri $santri)
     {
         $type_menu = 'santri';
+        $listKelas = Kelas::where('status', 'Aktif')->get();
+        $listUser = User::where('role', 'Orang Tua')->get();
 
-        // arahkan ke file pages/santris/edit
-        return view('pages.santris.edit', compact('santri', 'type_menu'));
+        // Ambil data orang tua berdasarkan siswa_id
+        $ortu = OrangTua::where('santri_id', $santri->id)->first();
+        $hubunganOptions = ['Ayah', 'Ibu', 'Wali'];
+
+        return view('pages.santri.edit', compact(
+            'type_menu',
+            'listKelas',
+            'listUser',
+            'santri',
+            'ortu',
+            'hubunganOptions'
+        ));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function update(Request $request, santri $santri)
+    public function update(Request $request, Santri $santri)
     {
-        // Validate the form data
         $request->validate([
-            'tanggal_lahir' => 'required',
-            'jenis_kelamin' => 'required',
-            'nis' => 'required',
+            'user_id' => 'required|unique:orangtuas,user_id',
             'kelas_id' => 'required',
-            'tanggal_masuk' =>'required',
+            'tanggal_lahir' => 'required|date',
+            'nis' => 'required|unique:santris,nis',
+            'jenis_kelamin' => 'required',
+            'tanggal_masuk' => 'required',
+            'alamat' => 'required',
+            'no_telepon' => [
+                'required',
+                'regex:/^628/',
+            ],
         ]);
 
-        // Update the santri data
-        $santri->update([
-            'tanggal_lahir' => $request->tanggallahir,
-            'jenis_kelamin' => $request->jeniskelamin,
-            'nis' => $request->nis,
-            'kelas_id'=> $request->kelas_id,
-            'tanggal_masuk'=> $request->tanggalmasuk,
-        ]);
+        try {
+            // Update data siswa
+            $santri->update([
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'kelas_id' => $request->kelas_id,
+                'nis' => $request->nis,
+                'nisn' => $request->nisn,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'no_telepon' => $request->no_telepon,
+            ]);
 
-        return Redirect::route('santri.index')->with('success', 'santri ' . $santri->name . ' berhasil diubah.');
+            // Update atau buat data orang tua
+            OrangTua::updateOrCreate(
+                ['santri_id' => $santri->id],
+                [
+                    'user_id' => $request->user_id,
+                    'alamat' => $request->alamat,
+                    'no_telepon' => $request->no_telepon_ortu,
+                ]
+            );
+
+            return redirect()->route('santri .index')->with('success', 'Data ' . $santri . ' berhasil diperbarui');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()])->withInput();
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(santri $santri)
+    public function show(Santri $santri)
+    {
+        $type_menu = 'santri';
+        $ortu = OrangTua::where('santri_id', $santri->id)->first();
+
+        return view('pages.santri.show', compact(
+            'type_menu',
+            'santri',
+            'ortu'
+        ));
+    }
+
+    public function destroy(Santri $santri)
     {
         $santri->delete();
-        return Redirect::route('santri.index')->with('success', 'santri '. $santri->name . ' berhasil di hapus.');
-    }
-    public function show($id)
-    {
-        $type_menu = 'santri';
-        $santri = santri::find($id);
-
-        // arahkan ke file pages/santris/edit
-        return view('pages.santris.show', compact('santri', 'type_menu'));
+        return Redirect::route('santri.index')->with('success', $santri . 'berhasil di hapus.');
     }
 }

@@ -10,11 +10,12 @@ class Santri extends Model
     //
     use HasFactory;
     protected $fillable = [
-    'tanggal_lahir',
-    'jenis_kelamin',
-    'nis',
-    'kelas_id',
-    'tanggal_masuk',
+        'nama',
+        'tanggal_lahir',
+        'jenis_kelamin',
+        'nis',
+        'kelas_id',
+        'tanggal_masuk',
     ];
     public function kelas()
     {

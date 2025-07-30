@@ -1,150 +1,131 @@
 @extends('layouts.app')
 
-@section('title', 'Jadwal')
+@section('title', 'Data Jadwal')
 
 @push('style')
-    <!-- CSS Libraries -->
-    <link rel="stylesheet" href="{{ asset('library/d') }}">
+    <link href="{{ asset('library/select2/dist/css/select2.min.css') }}" rel="stylesheet" />
 @endpush
 
 @section('main')
-    {{-- @if (Auth::user()->role == 'Jadwal') --}}
-        <div class="main-content">
-            <section class="section">
-                <div class="section-body">
-                    <div class="row">
-                        <div class="col-12">
-                            @include('layouts.alert')
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Data jadwals</h4>
+    <div class="main-content">
+        <section class="section">
+            @include('layouts.alert')
+
+            <div class="section-header">
+                <h1>Data Jadwal Pelajaran</h1>
+            </div>
+
+            <div class="section-body">
+                <div class="card">
+                    <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
+                        <form method="GET" action="{{ route('jadwal.index') }}" class="form-inline mb-2 mb-md-0">
+                            <div class="form-row">
+                                <div class="col mr-1">
+                                    <select name="kelas_id" class="form-control" onchange="this.form.submit()">
+                                        <option value="">-- Semua Kelas --</option>
+                                        @foreach ($kelasList as $k)
+                                            <option value="{{ $k->id }}"
+                                                {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
+                                                {{ $k->nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="card-body">
-                                    {{-- Filter & Tambah --}}
-                                    <div class="mb-3">
-                                        <div class="row align-items-end">
-                                            <div class="col-md-2 mb-2">
-                                                <a href="{{ route('jadwal.create') }}" class="btn btn-primary w-100">
-                                                    <i class="fas fa-plus"></i> Tambah
-                                                </a>
-                                            </div>
-                                            <div class="col-md-10">
-                                                <form action="{{ route('jadwal.index') }}" method="GET">
-                                                    <div class="form-row row">
-                                                        <div class="col-md-2 mb-2">
-                                                        </div>
-                                                        <div class="col-md-3 mb-2">
-                                                            <input type="text" name="name" class="form-control"
-                                                                placeholder="Cari Nama jadwal" value="{{ request('name') }}">
-                                                        </div>
-                                                        <div class="col-md-1 mb-2">
-                                                            <button class="btn btn-primary w-100" type="submit">
-                                                                <i class="fas fa-search"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="clearfix  divider mb-3"></div>
-
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-bordered table-lg" id="table-1">
-                                            <tr>
-                                                <th style="width: 3%">No</th>
-                                                <th class="text-center">Image</th>
-                                                <th>Jadwal</th>
-                                                <th>Mata_Pelajaran</th>
-                                                <th>Hari</th>
-                                                <th>Waktu</th>
-                                                <th style="width: 5%" class="text-center">Action</th>
-                                            </tr>
-                                            @foreach ($jadwals as $index => $jadwal)
-                                                <tr>
-                                                    <td>
-                                                        {{ $jadwal->firstItem() + $index }}
-                                                        {{ $jadwal->guru->matapelajaran->hari->jam_mulai->jam_selesai}}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <img alt="image"
-                                                            src="{{ $jadwal->image ? asset('img/jadwal/' . $jadwal->image) : asset('img/avatar/avatar-1.png') }}"
-                                                            class="rounded-circle" width="35" height="35"
-                                                            data-toggle="tooltip" title="avatar">
-                                                    </td>
-                                                    <td>
-                                                        {{ $jadwal->name }}
-                                                    </td>
-                                                    <td>
-                                                        {{ $jadwal->email }}
-                                                    </td>
-                                                    <td>
-                                                        {{ $jadwal->role }}
-                                                    </td>
-                                                    <td text='text-center'>
-                                                        <div class="d-flex justify-content-center">
-                                                            <a href="{{ route('jadwal.edit', $jadwal) }}"
-                                                                class="btn btn-sm btn-icon btn-primary m-1"
-                                                                data-bs-toggle="tooltip" title="Edit"><i
-                                                                    class="fas fa-edit"></i></a>
-                                                            <a href="{{ route('jadwal.show', $jadwal) }}"
-                                                                class="btn btn-sm btn-icon btn-info m-1"
-                                                                data-bs-toggle="tooltip" title="Lihat"><i
-                                                                    class="fas fa-eye"></i></a>
-                                                            <form action="{{ route('jadwal.destroy', $jadwal) }}"
-                                                                method="post">
-                                                                @csrf
-                                                                @method('delete')
-                                                                <button
-                                                                    class="btn btn-sm btn-icon m-1 btn-danger confirm-delete "
-                                                                    data-bs-toggle="tooltip" title="Hapus">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </table>
-                                        <div class="card-footer d-flex justify-content-between">
-                                            <span>
-                                                Showing {{ $jadwals->firstItem() }}
-                                                to {{ $jadwals->lastItem() }}
-                                                of {{ $jadwals->total() }} entries
-                                            </span>
-                                            <div class="paginate-sm">
-                                                {{ $jadwals->onEachSide(0)->links() }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="col mr-1">
+                                    <select name="hari" class="form-control" onchange="this.form.submit()">
+                                        <option value="">-- Semua Hari --</option>
+                                        @foreach ($hariList as $hari)
+                                            <option value="{{ $hari }}"
+                                                {{ request('hari') == $hari ? 'selected' : '' }}>
+                                                {{ $hari }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col mr-1">
+                                    <input type="text" name="nama" class="form-control" placeholder="Cari guru/mapel"
+                                        value="{{ request('nama') }}">
+                                </div>
+                                <div class="col">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-search"></i> Cari
+                                    </button>
                                 </div>
                             </div>
+                        </form>
+
+                        <a href="{{ route('jadwal.create') }}" class="btn btn-primary ml-md-2">
+                            <i class="fas fa-plus"></i> Tambah Jadwal
+                        </a>
+                    </div>
+
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Guru</th>
+                                    <th>Kelas</th>
+                                    <th>Mapel</th>
+                                    <th>Hari</th>
+                                    <th>Jam</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($jadwal as $index => $item)
+                                    <tr>
+                                        <td>{{ $jadwal->firstItem() + $index }}</td>
+                                        <td>{{ $item->guru->user->name ?? '-' }}</td>
+                                        <td>{{ $item->kelas->nama ?? '-' }}</td>
+                                        <td>{{ $item->mapel->nama ?? '-' }}</td>
+                                        <td>{{ $item->hari }}</td>
+                                        <td>{{ $item->jam_mulai }} - {{ $item->jam_selesai }}</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <a href="{{ route('jadwal.edit', $item) }}"
+                                                    class="btn btn-sm btn-icon btn-primary m-1" title="Edit Jadwal">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route('jadwal.destroy', $item) }}" method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus jadwal ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-sm btn-icon btn-danger m-1" title="Hapus Jadwal">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center">Tidak ada data jadwal.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between">
+                        <div>
+                            Menampilkan {{ $jadwal->firstItem() }} - {{ $jadwal->lastItem() }} dari
+                            {{ $jadwal->total() }} data
+                        </div>
+                        <div>
+                            {{ $jadwal->withQueryString()->links() }}
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
-    {{-- @else
-        <div class="alert alert-danger">
-            User role Anda tidak mendapatkan izin.
-        </div>
-    @endif --}}
-
+            </div>
+        </section>
+    </div>
 @endsection
-
 @push('scripts')
-    <!-- JS Libraies -->
-    <script src="{{ asset('library/datatables/media/js/jquery.dataTables.min.js') }}"></script>
-    {{-- <script src="{{ asset() }}"></script> --}}
-    {{-- <script src="{{ asset() }}"></script> --}}
-    <script src="{{ asset('library/jquery-ui-dist/jquery-ui.min.js') }}"></script>
-
-    <!-- Page Specific JS File -->
-    <script src="{{ asset('js/page/modules-datatables.js') }}"></script>
-    <script src="{{ asset('js/page/components-table.js') }}"></script>
+    <script src="{{ asset('library/select2/dist/js/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+        });
+    </script>
 @endpush
