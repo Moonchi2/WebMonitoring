@@ -27,37 +27,6 @@
                             <label>Nama Kelas</label>
                             <input type="text" name="nama" class="form-control" value="{{ old('nama') }}" required>
                         </div>
-
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select name="status" class="form-control" required>
-                                <option value="">Pilih Status</option>
-                                <option value="Aktif" {{ old('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                                <option value="Tidak Aktif" {{ old('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Radius (Meter)</label>
-                            <input type="number" name="radius" class="form-control" value="{{ old('radius') }}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Lokasi (Pilih di Peta atau Isi Manual)</label>
-                            <div id="map"></div>
-                        </div>
-
-                        <div class="form-group mt-2">
-                            <label>Latitude</label>
-                            <input type="text" name="latitude" id="latitude" class="form-control" value="{{ old('latitude', '-6.200000') }}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Longitude</label>
-                            <input type="text" name="longitude" id="longitude" class="form-control" value="{{ old('longitude', '106.816666') }}" required>
-                        </div>
-
-                        <small class="text-muted">* Geser marker atau isi manual koordinat</small>
                     </div>
 
                     <div class="card-footer text-right">

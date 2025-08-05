@@ -26,8 +26,10 @@ Route::middleware(['auth'])->group(function () {
   Route::post('profile/change-password/{user}', [ProfileController::class, 'changePassword'])->name('profile.change-password');
   Route::resource('kegiatan', KegiatanController::class);
   Route::resource('guru', GuruController::class);
-  Route::resource('jadwal',JadwalController::class);
-  Route::resource('kelas',KelasController::class);
-  Route::resource('matapelajaran',MataPelajaranController::class);
-  Route::resource('santri',SantriController::class);
+  Route::resource('jadwal', JadwalController::class);
+  Route::resource('kelas', KelasController::class)->parameters([
+    'kelas' => 'kelas'
+  ]);
+  Route::resource('matapelajaran', MataPelajaranController::class);
+  Route::resource('santri', SantriController::class);
 });

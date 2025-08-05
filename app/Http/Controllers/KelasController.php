@@ -10,7 +10,7 @@ class KelasController extends Controller
 {
    public function index(Request $request)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $keyword = trim($request->input('nama'));
         $kelas = Kelas::when($request->nama, function ($query, $nama) {
             $query->where('nama', 'like', '%' . $nama . '%');
@@ -23,7 +23,7 @@ class KelasController extends Controller
 
     public function create()
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
 
         return view('pages.kelas.create', compact('type_menu'));
     }
@@ -44,7 +44,7 @@ class KelasController extends Controller
 
     public function edit(Kelas $kelas)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
 
         return view('pages.kelas.edit', compact('kelas', 'type_menu'));
 

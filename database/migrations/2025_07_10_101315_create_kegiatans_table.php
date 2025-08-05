@@ -16,7 +16,10 @@ return new class extends Migration
             $table->foreignId('jadwal_id')->constrained('jadwals')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('santri_id')->constrained('santris')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('status');
+            $table->string('jenis_kegiatan');
+            $table->date('tanggal_kegiatan');
             $table->string('image');
+            $table->string('catatan')->nullable();
             $table->timestamps();
         });
     }

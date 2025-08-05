@@ -42,9 +42,12 @@
                                                                 <option value="Admin"
                                                                     {{ request('role') == 'Admin' ? 'selected' : '' }}>
                                                                     Admin</option>
-                                                                <option value="Customer"
-                                                                    {{ request('role') == 'Customer' ? 'selected' : '' }}>
-                                                                    Customer</option>
+                                                                <option value="Guru"
+                                                                    {{ request('role') == 'Guru' ? 'selected' : '' }}>
+                                                                    Guru</option>
+                                                                <option value="Orang Tua"
+                                                                    {{ request('role') == 'Orang Tua' ? 'selected' : '' }}>
+                                                                    Orang Tua</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-md-3 mb-2">

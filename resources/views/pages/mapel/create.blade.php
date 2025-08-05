@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Mapel')
+@section('title', 'Tambah Mata Pelajaran')
 
 @push('style')
     <!-- Tambahkan CSS Select2 jika diperlukan -->
@@ -18,7 +18,7 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('mapel.store') }}" method="POST">
+                        <form action="{{ route('matapelajaran.store') }}" method="POST">
                             @csrf
 
                             <div class="form-group">
@@ -59,7 +59,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Simpan
                             </button>
-                            <a href="{{ route('mapel.index') }}" class="btn btn-warning">Batal</a>
+                            <a href="{{ route('matapelajaran.index') }}" class="btn btn-warning">Batal</a>
                         </form>
                     </div>
                 </div>

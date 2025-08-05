@@ -14,7 +14,7 @@ class JadwalController extends Controller
 {
     public function index(Request $request)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
 
         $keyword = trim($request->input('nama'));
         $filterKelas = $request->kelas_id;
@@ -67,7 +67,7 @@ class JadwalController extends Controller
 
     public function create()
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $guru = Guru::with('user')->get();
         $mapel = MataPelajaran::all();
         $kelas = Kelas::all();
@@ -100,7 +100,7 @@ class JadwalController extends Controller
 
     public function edit(Jadwal $jadwal)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $guru = Guru::with('user')->get();
         $mapel = MataPelajaran::all();
         $kelas = Kelas::all();

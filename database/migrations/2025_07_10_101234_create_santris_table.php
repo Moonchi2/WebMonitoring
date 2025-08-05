@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('santris', function (Blueprint $table) {
             $table->id();
+            $table->string('nama');
             $table->date('tanggal_lahir');
             $table->string('jenis_kelamin');
             $table->integer('nis');

@@ -40,10 +40,6 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Kelas</th>
-                                    <th>Status</th>
-                                    <th>Latitude</th>
-                                    <th>Longitude</th>
-                                    <th>Radius</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -52,10 +48,6 @@
                                     <tr>
                                         <td>{{ $kelas->firstItem() + $index }}</td>
                                         <td>{{ $item->nama }}</td>
-                                        <td>{{ $item->status }}</td>
-                                        <td>{{ $item->latitude }}</td>
-                                        <td>{{ $item->longitude }}</td>
-                                        <td>{{ $item->radius }}</td>
                                         <td>
                                             <div class="d-flex justify-content-center">
                                                 <a href="{{ route('kelas.edit', $item) }}"

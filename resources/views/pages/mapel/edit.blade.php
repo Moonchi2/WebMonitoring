@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Mapel')
+@section('title', 'Edit Mata Pelajaran')
 
 @push('style')
     <!-- Tambahkan CSS Select2 jika diperlukan -->
@@ -18,7 +18,7 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('mapel.update', $mapel->id) }}" method="POST">
+                        <form action="{{ route('matapelajaran.update', $matapelajaran->id) }}" method="POST">
                             @csrf
                             @method('PUT')
 
@@ -29,7 +29,7 @@
                                     <option value="">-- Pilih Guru --</option>
                                     @foreach ($gurus as $guru)
                                         <option value="{{ $guru->id }}"
-                                            {{ $mapel->guru_id == $guru->id ? 'selected' : '' }}>
+                                            {{ $matapelajaran->guru_id == $guru->id ? 'selected' : '' }}>
                                             {{ $guru->user->name ?? '-' }}
                                         </option>
                                     @endforeach
@@ -40,8 +40,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="nama">Nama Mapel</label>
-                                <input type="text" name="nama" id="nama" value="{{ old('nama', $mapel->nama) }}"
+                                <label for="nama">Nama Mata Pelajaran</label>
+                                <input type="text" name="nama" id="nama" value="{{ old('nama', $matapelajaran->nama) }}"
                                     class="form-control @error('nama') is-invalid @enderror">
                                 @error('nama')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -49,8 +49,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="kode">Kode Mapel</label>
-                                <input type="text" name="kode" id="kode" value="{{ old('kode', $mapel->kode) }}"
+                                <label for="kode">Kode Mata Pelajaran</label>
+                                <input type="text" name="kode" id="kode" value="{{ old('kode', $matapelajaran->kode) }}"
                                     class="form-control @error('kode') is-invalid @enderror">
                                 @error('kode')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -60,7 +60,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Update
                             </button>
-                            <a href="{{ route('mapel.index') }}" class="btn btn-warning">Batal</a>
+                            <a href="{{ route('matapelajaran.index') }}" class="btn btn-warning">Batal</a>
                         </form>
                     </div>
                 </div>

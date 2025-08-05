@@ -12,8 +12,11 @@ class Kegiatan extends Model
     protected $fillable = [
         'jadwal_id',
         'santri_id',
+        'jenis_kegiatan',
+        'tanggal_kegiatan',
         'status',
         'image',
+        'catatan,'
     ];
 
 public function jadwal()

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Jadwal;
 use App\Models\Kegiatan;
+use App\Models\Santri;
 use Hash;
 use Illuminate\Http\Request;
-use Redirect;
+use Illuminate\Support\Facades\Redirect;
 
 class KegiatanController extends Controller
 {
@@ -56,11 +58,14 @@ class KegiatanController extends Controller
         // validasi data dari form tambah kegiatan
         $validatedData = $request->validate([
             'jadwal_id' => 'required',
-            'santri_id' => 'required|unique:kegiatans',
+            'santri_id' => 'required',
+            'jenis_kegiatan' => 'required',
+            'tanggal_kegiatan' => 'required',
             'status' => 'required',
             'image' => 'nullable|mimes:jpg,jpeg,png,gif',
+            'catatan' => 'nullable',
         ]);
-    // Handle the image upload if present
+        // Handle the image upload if present
         $imagePath = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
@@ -68,15 +73,18 @@ class KegiatanController extends Controller
             $image->move('img/user/', $imagePath);
         }
         //masukan data kedalam tabel kegiatans
-        kegiatan::create([
-            'jadwal_id' => $validatedData['name'],
-            'santri_id' => $validatedData['email'],
-            'status' => $validatedData['password'],
+        $kegiatan = kegiatan::create([
+            'jadwal_id' => $validatedData['jadwal_id'],
+            'santri_id' => $validatedData['santri_id'],
+            'jenis_kegiatan' => $validatedData['jenis_kegiatan'],
+            'tanggal_kegiatan' => $validatedData['tanggal_kegiatan'],
+            'status' => $validatedData['status'],
             'image' => $imagePath,
+            'catatan' => $validatedData['catatan'],
         ]);
 
         //jika proses berhsil arahkan kembali ke halaman kegiatans dengan status success
-        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $validatedData['name'] . ' berhasil ditambah.');
+        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $kegiatan->santri->nama . ' berhasil ditambah.');
     }
 
     /**
@@ -85,9 +93,10 @@ class KegiatanController extends Controller
     public function edit(kegiatan $kegiatan)
     {
         $type_menu = 'kegiatan';
-
+        $jadwal = Jadwal::all();
+        $santri = Santri::all();
         // arahkan ke file pages/kegiatans/edit
-        return view('pages.kegiatans.edit', compact('kegiatan', 'type_menu'));
+        return view('pages.kegiatans.edit', compact('kegiatan', 'type_menu', 'jadwal', 'santri'));
     }
 
     /**
@@ -98,18 +107,24 @@ class KegiatanController extends Controller
         // Validate the form data
         $request->validate([
             'jadwal_id' => 'required',
-            'santri_id' => 'required|unique:kegiatans',
+            'santri_id' => 'required',
+            'jenis_kegiatan' => 'required',
+            'tanggal_kegiatan' => 'required',
             'status' => 'required',
             'image' => 'nullable|mimes:jpg,jpeg,png,gif',
+            'catatan' => 'nullable',
         ]);
 
         // Update the kegiatan data
         $kegiatan->update([
             'jadwal_id' => $request->guru_id,
             'santri_id' => $request->mapel_id,
+            'jenis_kegiatan' => $request->jenis_kegiatan,
+            'tanggal_kegiatan' => $request->tanggal_kegiatan,
             'status' => $request->status,
+            'catatan' => $request->catatan,
         ]);
-         if ($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             $image = $request->file('image');
             $path = uniqid() . '.' . $image->getClientOriginalExtension();
             $image->move('img/kegitan/', $path);
@@ -118,7 +133,7 @@ class KegiatanController extends Controller
             ]);
         }
 
-        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $kegiatan->name . ' berhasil diubah.');
+        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $kegiatan->santri->name . ' berhasil diubah.');
     }
 
     /**
@@ -127,7 +142,7 @@ class KegiatanController extends Controller
     public function destroy(kegiatan $kegiatan)
     {
         $kegiatan->delete();
-        return Redirect::route('kegiatan.index')->with('success', 'kegiatan '. $kegiatan->name . ' berhasil di hapus.');
+        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $kegiatan->name . ' berhasil di hapus.');
     }
     public function show($id)
     {

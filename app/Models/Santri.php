@@ -21,5 +21,9 @@ class Santri extends Model
     {
         return $this->belongsTo(Kelas::class);
     }
+    public function orangTua()
+    {
+        return $this->hasOne(OrangTua::class);
+    }
 
 }

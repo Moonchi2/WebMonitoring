@@ -11,7 +11,7 @@ class GuruController extends Controller
 {
    public function index(Request $request)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
 
         $keyword = trim($request->input('nama'));
 
@@ -31,7 +31,7 @@ class GuruController extends Controller
     }
     public function create()
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $users = User::where('role', 'Guru')->get();
 
         return view('pages.guru.create', compact('type_menu', 'users'));
@@ -62,7 +62,7 @@ class GuruController extends Controller
 
     public function edit(Guru $guru)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $users = User::where('role', 'Guru')->get();
 
         return view('pages.guru.edit', compact('guru', 'type_menu', 'users'));

@@ -11,10 +11,10 @@ class MataPelajaranController extends Controller
 {
     public function index(Request $request)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $keyword = trim($request->input('nama'));
 
-        $mapel = MataPelajaran::with('guru.user')
+        $matapelajaran = MataPelajaran::with('guru.user')
             ->when($keyword, function ($query, $keyword) {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('nama', 'like', '%' . $keyword . '%')
@@ -26,14 +26,14 @@ class MataPelajaranController extends Controller
             ->latest()
             ->paginate(10);
 
-        $mapel->appends(['nama' => $keyword]);
+        $matapelajaran->appends(['nama' => $keyword]);
 
-        return view('pages.mapel.index', compact('type_menu', 'mapel'));
+        return view('pages.mapel.index', compact('type_menu', 'matapelajaran'));
     }
 
     public function create()
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $gurus = Guru::with('user')->get();
 
         return view('pages.mapel.create', compact('type_menu', 'gurus'));
@@ -44,50 +44,50 @@ class MataPelajaranController extends Controller
         $request->validate([
             'guru_id' => 'required|exists:gurus,id',
             'nama' => 'required|string|max:255',
-            'kode' => 'required|string|max:50|unique:mapels,kode',
+            'kode' => 'required|string|max:50|unique:mata_pelajarans,kode',
         ]);
 
-        $mapel = MataPelajaran::create([
+        $matapelajaran = MataPelajaran::create([
             'guru_id' => $request->guru_id,
             'nama' => $request->nama,
             'kode' => $request->kode,
         ]);
 
-        return Redirect::route('mapel.index')
-            ->with('success', 'Mata Pelajaran ' . $mapel->nama . ' berhasil ditambahkan.');
+        return Redirect::route('matapelajaran.index')
+            ->with('success', 'Mata Pelajaran ' . $matapelajaran->nama . ' berhasil ditambahkan.');
     }
 
-    public function edit(MataPelajaran $mapel)
+    public function edit(MataPelajaran $matapelajaran)
     {
-        $type_menu = 'sekolah';
+        $type_menu = 'kelola';
         $gurus = Guru::with('user')->get();
 
-        return view('pages.mapel.edit', compact('type_menu', 'mapel', 'gurus'));
+        return view('pages.mapel.edit', compact('type_menu', 'matapelajaran', 'gurus'));
     }
 
-    public function update(Request $request, MataPelajaran $mapel)
+    public function update(Request $request, MataPelajaran $matapelajaran)
     {
         $request->validate([
             'guru_id' => 'required|exists:gurus,id',
             'nama' => 'required|string|max:255',
-            'kode' => 'required|string|max:50|unique:mapels,kode,' . $mapel->id,
+            'kode' => 'required|string|max:50|unique:mata_pelajarans,kode,' . $matapelajaran->id,
         ]);
 
-        $mapel->update([
+        $matapelajaran->update([
             'guru_id' => $request->guru_id,
             'nama' => $request->nama,
             'kode' => $request->kode,
         ]);
 
-        return Redirect::route('mapel.index')
-            ->with('success', 'Mata Pelajaran ' . $mapel->nama . ' berhasil diubah.');
+        return Redirect::route('matapelajaran.index')
+            ->with('success', 'Mata Pelajaran ' . $matapelajaran->nama . ' berhasil diubah.');
     }
 
-    public function destroy(MataPelajaran $mapel)
+    public function destroy(MataPelajaran $matapelajaran)
     {
-        $mapel->delete();
+        $matapelajaran->delete();
 
-        return Redirect::route('mapel.index')
-            ->with('success', 'Mata Pelajaran ' . $mapel->nama . ' berhasil dihapus.');
+        return Redirect::route('matapelajaran.index')
+            ->with('success', 'Mata Pelajaran ' . $matapelajaran->nama . ' berhasil dihapus.');
     }
 }

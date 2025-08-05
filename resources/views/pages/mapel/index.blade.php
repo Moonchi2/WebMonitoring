@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Data Mapel')
+@section('title', 'Data Mata Pelajaran')
 
 @push('style')
     <!-- Tambahkan CSS tambahan jika diperlukan -->
@@ -17,7 +17,7 @@
             <div class="section-body">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <form method="GET" action="{{ route('mapel.index') }}" class="form-inline">
+                        <form method="GET" action="{{ route('matapelajaran.index') }}" class="form-inline">
                             <div class="input-group">
                                 <input type="text" name="nama" class="form-control" placeholder="Cari nama guru"
                                     value="{{ request('nama') }}">
@@ -29,8 +29,8 @@
                             </div>
                         </form>
 
-                        <a href="{{ route('mapel.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Tambah Mapel
+                        <a href="{{ route('matapelajaran.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Mata Pelajaran
                         </a>
                     </div>
 
@@ -39,32 +39,32 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Nama Mapel</th>
+                                    <th>Nama Mata Pelajaran</th>
                                     <th>Kode</th>
                                     <th>Nama Guru</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($mapel as $index => $item)
+                                @forelse ($matapelajaran as $index => $item)
                                     <tr>
-                                        <td>{{ $mapel->firstItem() + $index }}</td>
+                                        <td>{{ $matapelajaran->firstItem() + $index }}</td>
                                         <td>{{ $item->nama }}</td>
                                         <td>{{ $item->kode }}</td>
                                         <td>{{ $item->guru->user->name ?? '-' }}</td>
                                         <td>
                                             <div class="d-flex justify-content-center">
-                                                <a href="{{ route('mapel.edit', $item) }}"
+                                                <a href="{{ route('matapelajaran.edit', $item) }}"
                                                     class="btn btn-sm btn-icon btn-primary m-1" data-toggle="tooltip"
-                                                    title="Edit Mapel">
+                                                    title="Edit matapelajaran">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
 
-                                                <form action="{{ route('mapel.destroy', $item) }}" method="POST">
+                                                <form action="{{ route('matapelajaran.destroy', $item) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-sm btn-icon m-1 btn-danger confirm-delete"
-                                                        data-toggle="tooltip" title="Hapus Mapel">
+                                                        data-toggle="tooltip" title="Hapus matapelajaran">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -73,7 +73,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center">Tidak ada data mapel.</td>
+                                        <td colspan="5" class="text-center">Tidak ada data matapelajaran.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -82,11 +82,11 @@
 
                     <div class="card-footer d-flex justify-content-between">
                         <div>
-                            Menampilkan {{ $mapel->firstItem() }} - {{ $mapel->lastItem() }} dari {{ $mapel->total() }}
+                            Menampilkan {{ $matapelajaran->firstItem() }} - {{ $matapelajaran->lastItem() }} dari {{ $matapelajaran->total() }}
                             data
                         </div>
                         <div>
-                            {{ $mapel->withQueryString()->links() }}
+                            {{ $matapelajaran->withQueryString()->links() }}
                         </div>
                     </div>
                 </div>

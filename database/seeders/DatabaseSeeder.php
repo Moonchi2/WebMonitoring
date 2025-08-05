@@ -30,6 +30,20 @@ class DatabaseSeeder extends Seeder
                 'role' => 'Admin',
                 'created_at' => date('Y-m-d H:i:s')
             ],
+             [
+                'name' => 'guru',
+                'email' => 'guru@gmail.com',
+                'password' => Hash::make('12345678'),
+                'role' => 'Guru',
+                'created_at' => date('Y-m-d H:i:s')
+            ],
+             [
+                'name' => 'orangtua',
+                'email' => 'ortu@gmail.com',
+                'password' => Hash::make('12345678'),
+                'role' => 'Orang Tua',
+                'created_at' => date('Y-m-d H:i:s')
+            ],
         ]);
     }
 }

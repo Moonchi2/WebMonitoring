@@ -12,6 +12,7 @@ class Jadwal extends Model
     protected $fillable = [
         'guru_id',
         'mapel_id',
+        'kelas_id',
         'hari',
         'jam_mulai',
         'jam_selesai',
@@ -24,5 +25,9 @@ class Jadwal extends Model
     public function mapel()
     {
         return $this->belongsTo(MataPelajaran::class);
+    }
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class);
     }
 }

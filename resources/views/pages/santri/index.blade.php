@@ -1,22 +1,24 @@
 @extends('layouts.app')
 
-@section('title', 'Data Siswa')
+@section('title', 'Data Santri')
+
 @push('style')
-    <!-- CSS Libraries -->
-    <link rel="stylesheet" href="{{ asset('library/d') }}">
+    <!-- Tambahkan CSS jika diperlukan -->
 @endpush
+
 @section('main')
     <div class="main-content">
         <section class="section">
             @include('layouts.alert')
+
             <div class="section-header">
-                <h1>Data Siswa</h1>
+                <h1>Data Santri</h1>
             </div>
 
             <div class="section-body">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <form method="GET" action="{{ route('siswa.index') }}" class="form-inline">
+                        <form method="GET" action="{{ route('santri.index') }}" class="form-inline">
                             <div class="input-group mr-2">
                                 <select name="kelas" class="form-control" onchange="this.form.submit()">
                                     <option value="">Semua Kelas</option>
@@ -28,7 +30,7 @@
                                 </select>
                             </div>
                             <div class="input-group">
-                                <input type="text" name="search" class="form-control" placeholder="Cari nama siswa"
+                                <input type="text" name="search" class="form-control" placeholder="Cari nama santri"
                                     value="{{ $keyword }}">
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" type="submit">
@@ -36,10 +38,13 @@
                                     </button>
                                 </div>
                             </div>
+                            @if ($keyword || $kelasId)
+                                <a href="{{ route('santri.index') }}" class="btn btn-warning ml-2">Reset</a>
+                            @endif
                         </form>
 
-                        <a href="{{ route('siswa.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Tambah Siswa
+                        <a href="{{ route('santri.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Santri
                         </a>
                     </div>
 
@@ -49,36 +54,35 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama</th>
-                                    <th>Email</th>
                                     <th>Kelas</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($siswas as $index => $siswa)
+                                @forelse ($santris as $index => $santri)
                                     <tr>
-                                        <td>{{ $siswas->firstItem() + $index }}</td>
-                                        <td>{{ $siswa->user->name }}</td>
-                                        <td>{{ $siswa->user->email }}</td>
-                                        <td>{{ $siswa->kelas->nama ?? '-' }}</td>
+                                        <td>{{ $santris->firstItem() + $index }}</td>
+                                        <td>{{ $santri['nama'] ?? '-' }}</td>
+                                        <td>{{ $santri['kelas']['nama'] ?? '-' }}</td>
                                         <td>
                                             <div class="d-flex justify-content-center">
-                                                <a href="{{ route('siswa.edit', $siswa) }}"
+                                                <a href="{{ route('santri.edit', $santri['id']) }}"
                                                     class="btn btn-sm btn-icon btn-primary m-1" data-toggle="tooltip"
-                                                    title="Edit Siswa">
+                                                    title="Edit santri">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
 
-                                                <a href="{{ route('siswa.show', $siswa) }}"
+                                                <a href="{{ route('santri.show', $santri['id']) }}"
                                                     class="btn btn-sm btn-icon btn-info m-1" data-toggle="tooltip"
                                                     title="Lihat Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
 
-                                                <form action="{{ route('siswa.destroy', $siswa) }}" method="POST">
+                                                <form action="{{ route('santri.destroy', $santri['id']) }}" method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus santri ini?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button  class="btn btn-sm btn-icon m-1 btn-danger confirm-delete"
+                                                    <button type="submit" class="btn btn-sm btn-icon btn-danger m-1"
                                                         data-toggle="tooltip" title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -88,7 +92,13 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center">Tidak ada data siswa.</td>
+                                        <td colspan="4" class="text-center">
+                                            @if ($keyword || $kelasId)
+                                                Tidak ditemukan santri dengan filter yang diberikan.
+                                            @else
+                                                Tidak ada data santri.
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -97,11 +107,11 @@
 
                     <div class="card-footer d-flex justify-content-between">
                         <div>
-                            Menampilkan {{ $siswas->firstItem() }} - {{ $siswas->lastItem() }} dari
-                            {{ $siswas->total() }} data
+                            Menampilkan {{ $santris->firstItem() ?? 0 }} - {{ $santris->lastItem() ?? 0 }} dari
+                            {{ $santris->total() }} data
                         </div>
                         <div>
-                            {{ $siswas->withQueryString()->links() }}
+                            {{ $santris->withQueryString()->links() }}
                         </div>
                     </div>
                 </div>
