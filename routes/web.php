@@ -3,6 +3,7 @@
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\MataPelajaranController;
@@ -24,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
   Route::post('/profile/update/{user}', [ProfileController::class, 'update'])->name('profile.update');
   Route::get('profile/change-password', [ProfileController::class, 'changePasswordForm'])->name('profile.change-password-form');
   Route::post('profile/change-password/{user}', [ProfileController::class, 'changePassword'])->name('profile.change-password');
+  Route::resource('kalender', KalenderController::class);
   Route::resource('kegiatan', KegiatanController::class);
   Route::resource('guru', GuruController::class);
   Route::resource('jadwal', JadwalController::class);

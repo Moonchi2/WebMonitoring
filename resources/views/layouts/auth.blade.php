@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'Login')</title>
@@ -13,6 +14,7 @@
             background: url('{{ asset('img/bg/background.jpg') }}') no-repeat center center fixed;
             background-size: cover;
         }
+
         .login-box {
             max-width: 400px;
             margin: 5% auto;
@@ -21,6 +23,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             padding: 32px;
         }
+
         .logo-img {
             width: 64px;
             height: 64px;
@@ -29,9 +32,18 @@
             display: block;
         }
     </style>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('favicon//site.webmanifest') }}">
     @stack('style')
 </head>
+
 <body>
     @yield('main')
 </body>
+
 </html>

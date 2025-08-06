@@ -33,6 +33,11 @@
                     </li>
                 @endif
                 @if ($role === 'Admin')
+                    <li class="nav-item dropdown {{ $type_menu === 'kalender' ? 'active' : '' }}">
+                        <a href="{{ route('kalender.index') }}" class="nav-link">
+                            <i class="fas fa-calendar-alt"></i><span>Kalender</span>
+                        </a>
+                    </li>
                     <li class="nav-item dropdown {{ $type_menu === 'kelola' ? 'active' : '' }}">
                         <a href="#" class="nav-link has-dropdown">
                             <i class="fas fa-calendar-alt"></i><span>Kelola Kegiatan</span>

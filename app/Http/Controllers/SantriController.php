@@ -28,6 +28,7 @@ class SantriController extends Controller
         // Jika ada keyword, lakukan pencarian manual menggunakan DAC
         if ($keyword) {
             $filtered = $this->searchSantriDAC($allSantris->toArray(), $keyword);
+            //  dd($filtered);
             $santris = collect($filtered);
         } else {
             $santris = $allSantris;

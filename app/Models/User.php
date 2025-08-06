@@ -47,4 +47,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function orangtua()
+    {
+        return $this->hasOne(OrangTua::class);
+    }
+    public function guru()
+    {
+        return $this->hasOne(Guru::class);
+    }
 }

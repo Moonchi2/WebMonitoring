@@ -3,116 +3,140 @@
 @section('title', 'Profile')
 
 @push('style')
-    <!-- CSS Libraries -->
     <link rel="stylesheet" href="{{ asset('library/selectric/public/selectric.css') }}">
 @endpush
 
 @section('main')
     <div class="main-content">
-        @include('layouts.alert')
         <section class="section">
             <div class="section-header">
                 <h1>Profile</h1>
-                <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="{{ route('profile.index') }}">Profile</a></div>
-                </div>
             </div>
+
             <div class="section-body">
-                <div class="row">
-                    <div class="col-12">
-                        @include('layouts.alert')
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <form enctype="multipart/form-data">
-                            <div class="row">
-                                <div class="col-12 col-md-12 col-lg-4">
-                                    <div class="card profile-widget">
-                                        <div class="profile-widget-header">
-                                            <img alt="image"
-                                                src="{{ Auth::user()->image ? asset('img/user/' . Auth::user()->image) : asset('img/avatar/avatar-1.png') }}"
-                                                class="rounded-circle profile-widget-picture" width="100" height="100">
+                @include('layouts.alert')
 
-                                        </div>
-                                        <div class="profile-widget-description">
-                                            <div class="profile-widget-name">
-                                                {{ Auth::user()->email }} -
-                                                {{ Auth::user()->role }}
-                                            </div>
-
-                                        </div>
-                                        <div class="card-footer mb-2">
-                                            <a href="{{ route('profile.edit', Auth::user()) }}"
-                                                class="btn btn-primary btn-lg btn-block">
-                                                Edit Akun
-                                            </a>
-                                            <a href="{{ route('profile.change-password-form', Auth::user()) }}"
-                                                class="btn btn-warning btn-lg btn-block">Ganti Password</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-12 col-lg-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h4>Profile</h4>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="form-group col-md-6 mb-3">
-                                                    <label for="name" class="form-label">Nama</label>
-                                                    <input type="text" class="form-control" id="name" name="name"
-                                                        readonly value="{{ Auth::user()->name }}">
-                                                </div>
-                                                <div class="form-group col-md-6 mb-3">
-                                                    <label for="email" class="form-label">Email</label>
-                                                    <input type="email" class="form-control" name="email" id="email"
-                                                        readonly value="{{ Auth::user()->email }}">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <div class="card profile-widget">
+                            <div class="profile-widget-header text-center">
+                                <img src="{{ asset(optional(Auth::user())->image ? 'img/user/' . Auth::user()->image : 'img/avatar/avatar-1.png') }}"
+                                     class="rounded-circle profile-widget-picture"
+                                     style="width: 100px; height: 100px; object-fit: cover;">
                             </div>
-                        </form>
+
+                            <div class="card-body text-center">
+                                <h5>{{ Auth::user()->name }}</h5>
+                                <p class="text-muted">{{ Auth::user()->email }} - {{ Auth::user()->role }}</p>
+                            </div>
+
+                            <div class="card-footer">
+                                <a href="{{ route('profile.edit', Auth::user()->id) }}" class="btn btn-primary btn-block">Edit Profil</a>
+                                <a href="{{ route('profile.change-password-form', Auth::user()->id) }}" class="btn btn-warning btn-block">Ganti Password</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Informasi Akun</h4>
+                            </div>
+
+                            <div class="card-body">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width:30%">Nama</th>
+                                            <td>{{ Auth::user()->name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Email</th>
+                                            <td>{{ Auth::user()->email }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Role</th>
+                                            <td>{{ Auth::user()->role }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                {{-- Data khusus role Orang Tua --}}
+                                @if (Auth::user()->role === 'Orang Tua')
+                                    <div class="mt-4">
+                                        <h5>Data Santri</h5>
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Nama</th>
+                                                    <td>{{ optional(optional(Auth::user()->orangtua)->santri)->nama ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>NIS</th>
+                                                    <td>{{ optional(optional(Auth::user()->orangtua)->santri)->nis ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Tanggal Lahir</th>
+                                                    <td>{{ optional(optional(Auth::user()->orangtua)->santri)->tanggal_lahir ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Tanggal Masuk</th>
+                                                    <td>{{ optional(optional(Auth::user()->orangtua)->santri)->tanggal_masuk ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Kelas</th>
+                                                    <td>{{ optional(optional(optional(Auth::user()->orangtua)->santri)->kelas)->nama ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Jenis Kelamin</th>
+                                                    <td>{{ optional(optional(Auth::user()->orangtua)->santri)->jenis_kelamin ?? '-' }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <h5 class="mt-4">Data Orang Tua</h5>
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Alamat</th>
+                                                    <td>{{ optional(Auth::user()->orangtua)->alamat ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>No HP</th>
+                                                    <td>{{ optional(Auth::user()->orangtua)->no_telepon ?? '-' }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                {{-- Data khusus role Guru --}}
+                                @elseif (Auth::user()->role === 'Guru')
+                                    <div class="mt-4">
+                                        <h5>Data Guru</h5>
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <th>NIP</th>
+                                                    <td>{{ optional(Auth::user()->guru)->nip ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Jenis Kelamin</th>
+                                                    <td>{{ optional(Auth::user()->guru)->jenis_kelamin ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>No HP</th>
+                                                    <td>{{ optional(Auth::user()->guru)->no_telepon ?? '-' }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </div>
 @endsection
-
-@push('scripts')
-    <!-- JS Libraies -->
-    <script src="{{ asset('library/selectric/public/jquery.selectric.min.js') }}"></script>
-    <script>
-        function previewImage() {
-            var fileInput = document.getElementById('file-input');
-            var imagePreview = document.getElementById('image-preview');
-
-            // Cek apakah ada file yang dipilih
-            if (fileInput.files && fileInput.files[0]) {
-                var reader = new FileReader();
-
-                reader.onload = function(e) {
-                    // Menetapkan src gambar pratinjau dengan data URL dari file yang dipilih
-                    imagePreview.src = e.target.result;
-                }
-
-                // Membaca file sebagai data URL
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                // Jika tidak ada file yang dipilih, menetapkan src ke gambar default
-                imagePreview.src = "{{ asset('img/avatar/avatar-1.png') }}";
-            }
-        }
-    </script>
-
-    <!-- Page Specific JS File -->
-    <script src="{{ asset('js/page/features-posts.js') }}"></script>
-    <!-- JS Libraies -->
-    <script src="{{ asset('library/jquery-ui-dist/jquery-ui.min.js') }}"></script>
-
-    <!-- Page Specific JS File -->
-    <script src="{{ asset('js/page/components-table.js') }}"></script>
-@endpush
