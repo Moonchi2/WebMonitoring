@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kalenders', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
+            $table->string('kegiatan');
             $table->date('tanggal_awal');
             $table->date('tanggal_akhir');
             $table->string('keterangan');

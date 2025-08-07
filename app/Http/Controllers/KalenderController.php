@@ -41,12 +41,13 @@ class KalenderController extends Controller
     {
 
         $request->validate([
+            'kegiatan' => 'required',
             'tanggal_awal' => 'required',
             'tanggal_akhir' => 'required',
             'keterangan' => 'required',
         ]);
-
-        $kalender = kalender::create([
+        kalender::create([
+            'kegiatan' => $request->input('kegiatan'),
             'tanggal_awal' => $request->tanggal_awal,
             'tanggal_akhir' => $request->tanggal_akhir,
             'keterangan' => $request->keterangan,
@@ -65,12 +66,14 @@ class KalenderController extends Controller
     public function update(Request $request, kalender $kalender)
     {
         $request->validate([
+            'kegiatan' => 'required',
             'tanggal_awal' => 'required',
             'tanggal_akhir' => 'required',
             'keterangan' => 'required',
         ]);
 
         $kalender->update([
+            'kegiatan' => $request->kegiatan,
             'tanggal_awal' => $request->tanggal_awal,
             'tanggal_akhir' => $request->tanggal_akhir,
             'keterangan' => $request->keterangan,
@@ -84,9 +87,9 @@ class KalenderController extends Controller
         return Redirect::route('kalender.index')->with('success', 'kalender berhasil di hapus.');
     }
     public function show(Kalender $kalender)
-{
-    $type_menu = 'kalender';
-    return view('pages.kalender.show', compact('kalender', 'type_menu'));
-}
+    {
+        $type_menu = 'kalender';
+        return view('pages.kalender.show', compact('kalender', 'type_menu'));
+    }
 
 }

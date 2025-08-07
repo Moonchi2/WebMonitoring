@@ -4,152 +4,273 @@ namespace App\Http\Controllers;
 
 use App\Models\Jadwal;
 use App\Models\Kegiatan;
+use App\Models\Kelas;
 use App\Models\Santri;
 use Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 
 class KegiatanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $type_menu = 'kegiatan';
+        $user = Auth::user();
 
-        // ambil data dari tabel kegiatan berdasarkan nama jika terdapat request
-        $keyword = trim($request->input('name'));
-        $role = $request->input('role');
+        // Cek role dan relasi
+        if ($user->role === 'Guru') {
+            $guru = $user->guru;
+            if (!$guru) {
+                dd('Guru tidak ditemukan untuk user ID ' . $user->id);
+            }
+        } elseif ($user->role === 'Orang Tua') {
+            $orangtua = $user->orangtua;
+            if (!$orangtua) {
+                dd('Orang Tua tidak ditemukan untuk user ID ' . $user->id);
+            }
+        }
 
-        // Query kegiatans dengan filter pencarian dan role
-        $kegiatans = Kegiatan::when($keyword, function ($query, $name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        })
-            ->when($role, function ($query, $role) {
-                $query->where('role', $role);
-            })
-            ->latest()
-            ->paginate(10);
+        // Mulai query
+        $query = Jadwal::with(['kelas', 'mapel', 'guru.user']);
 
-        // Tambahkan parameter query ke pagination
-        $kegiatans->appends(['name' => $keyword, 'role' => $role]);
+        if ($user->role === 'Guru') {
+            $guru = $user->guru;
+            $query->where('guru_id', $guru->id);
+        } elseif ($user->role === 'OrangTua') {
+            $orangtua = $user->orangtua;
+            $santri = Santri::where('id', $orangtua->santri_id)->get();
+            $query->where('kelas_id', $santri->kelas_id);
+        }
 
-        // arahkan ke file pages/kegiatans/index.blade.php
-        return view('pages.kegiatan.index', compact('type_menu', 'kegiatans'));
+        // Filter dan search
+        if ($request->filled('q')) {
+            $query->where(function ($q1) use ($request) {
+                $q1->whereHas('guru.user', function ($q2) use ($request) {
+                    $q2->where('name', 'like', '%' . $request->q . '%');
+                })->orWhereHas('mapel', function ($q3) use ($request) {
+                    $q3->where('nama', 'like', '%' . $request->q . '%');
+                });
+            });
+        }
+
+        if ($request->filled('kelas_id') && $user->role !== 'siswa') {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+
+        if ($request->filled('hari')) {
+            $query->where('hari', $request->hari);
+        }
+
+        $jadwals = $query->paginate(10)->withQueryString();
+        $kelasList = ($user->role !== 'Siswa') ? Kelas::all() : [];
+
+        return view('pages.kegiatan.index', [
+            'type_menu' => 'kegiatan',
+            'jadwals' => $jadwals,
+            'kelasList' => $kelasList,
+            'selectedKelas' => $request->kelas_id,
+            'selectedHari' => $request->hari,
+            'searchQuery' => $request->q,
+        ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function add(Jadwal $kegiatan)
     {
-        $type_menu = 'kegiatan';
+        $santris = Santri::where('kelas_id', $kegiatan->kelas_id)->get();
 
-        // arahkan ke file pages/kegiatans/create.blade.php
-        return view('pages.kegiatans.create', compact('type_menu'));
+        return view('pages.kegiatan.create', [
+            'type_menu' => 'absen',
+            'jadwals' => $kegiatan,
+            'santris' => $santris,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // validasi data dari form tambah kegiatan
-        $validatedData = $request->validate([
-            'jadwal_id' => 'required',
-            'santri_id' => 'required',
-            'jenis_kegiatan' => 'required',
-            'tanggal_kegiatan' => 'required',
-            'status' => 'required',
-            'image' => 'nullable|mimes:jpg,jpeg,png,gif',
-            'catatan' => 'nullable',
+        $request->validate([
+            'santri_id' => 'required|array',
+            'jenis_kegiatan' => 'required|array',
+            'jenis_kegiatan.*' => 'required|string|in:Belajar,Hafalan,Ujian',
+            'status' => 'required|array',
+            'status.*' => 'required|string|in:Hadir,Izin,Sakit',
+            'catatan' => 'nullable|array',
+            'catatan.*' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'jadwal_id' => 'required|integer|exists:jadwals,id',
         ]);
-        // Handle the image upload if present
+
+        $santriIds = $request->input('santri_id');
+        $jenis_kegiatan = $request->input('jenis_kegiatan');
+        $status = $request->input('status');
+        $catatan = $request->input('catatan', []);
+        $jadwalId = $request->input('jadwal_id');
+
         $imagePath = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imagePath = uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move('img/user/', $imagePath);
+            $image->move(public_path('img/kegiatan/'), $imagePath);
         }
-        //masukan data kedalam tabel kegiatans
-        $kegiatan = kegiatan::create([
-            'jadwal_id' => $validatedData['jadwal_id'],
-            'santri_id' => $validatedData['santri_id'],
-            'jenis_kegiatan' => $validatedData['jenis_kegiatan'],
-            'tanggal_kegiatan' => $validatedData['tanggal_kegiatan'],
-            'status' => $validatedData['status'],
-            'image' => $imagePath,
-            'catatan' => $validatedData['catatan'],
-        ]);
 
-        //jika proses berhsil arahkan kembali ke halaman kegiatans dengan status success
-        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $kegiatan->santri->nama . ' berhasil ditambah.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function edit(kegiatan $kegiatan)
-    {
-        $type_menu = 'kegiatan';
-        $jadwal = Jadwal::all();
-        $santri = Santri::all();
-        // arahkan ke file pages/kegiatans/edit
-        return view('pages.kegiatans.edit', compact('kegiatan', 'type_menu', 'jadwal', 'santri'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function update(Request $request, kegiatan $kegiatan)
-    {
-        // Validate the form data
-        $request->validate([
-            'jadwal_id' => 'required',
-            'santri_id' => 'required',
-            'jenis_kegiatan' => 'required',
-            'tanggal_kegiatan' => 'required',
-            'status' => 'required',
-            'image' => 'nullable|mimes:jpg,jpeg,png,gif',
-            'catatan' => 'nullable',
-        ]);
-
-        // Update the kegiatan data
-        $kegiatan->update([
-            'jadwal_id' => $request->guru_id,
-            'santri_id' => $request->mapel_id,
-            'jenis_kegiatan' => $request->jenis_kegiatan,
-            'tanggal_kegiatan' => $request->tanggal_kegiatan,
-            'status' => $request->status,
-            'catatan' => $request->catatan,
-        ]);
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $path = uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move('img/kegitan/', $path);
-            $kegiatan->update([
-                'image' => $path
+        foreach ($santriIds as $santriId) {
+            Kegiatan::create([
+                'tanggal_kegiatan' => now(),
+                'jenis_kegiatan' => $jenis_kegiatan[$santriId] ?? null,
+                'status' => $status[$santriId] ?? null,
+                'catatan' => $catatan[$santriId] ?? null,
+                'image' => $imagePath,
+                'jadwal_id' => $jadwalId,
+                'santri_id' => $santriId,
             ]);
         }
 
-        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $kegiatan->santri->name . ' berhasil diubah.');
+        return redirect()->route('kegiatan.index')->with('success', 'Data Kegiatan berhasil disimpan.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(kegiatan $kegiatan)
+    public function edit(Jadwal $kegiatan)
     {
-        $kegiatan->delete();
-        return Redirect::route('kegiatan.index')->with('success', 'kegiatan ' . $kegiatan->name . ' berhasil di hapus.');
+        $santris = Santri::where('kelas_id', $kegiatan->kelas_id)->get();
+
+        // Ambil semua kegiatan yang terkait jadwal tersebut
+        $kegiatanData = Kegiatan::where('jadwal_id', $kegiatan->id)
+            ->get()
+            ->keyBy('santri_id'); // supaya bisa diakses dengan $kegiatanData[$santri->id]
+
+        return view('pages.kegiatan.edit', [
+            'type_menu' => 'absen',
+            'jadwals' => $kegiatan,
+            'santris' => $santris,
+            'kegiatanData' => $kegiatanData,
+        ]);
     }
-    public function show($id)
+
+    public function update(Request $request, Jadwal $kegiatan)
     {
+        $request->validate([
+            'santri_id' => 'required|array',
+            'jenis_kegiatan' => 'required|array',
+            'jenis_kegiatan.*' => 'required|string|in:Belajar,Hafalan,Ujian',
+            'status' => 'required|array',
+            'status.*' => 'required|string|in:Hadir,Izin,Sakit',
+            'catatan' => 'nullable|array',
+            'catatan.*' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $santriIds = $request->input('santri_id');
+        $jenis_kegiatan = $request->input('jenis_kegiatan');
+        $status = $request->input('status');
+        $catatan = $request->input('catatan', []);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imagePath = uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('img/kegiatan/'), $imagePath);
+        }
+
+        foreach ($santriIds as $santriId) {
+            $kegiatan = Kegiatan::where('jadwal_id', $kegiatan->id)
+                ->where('santri_id', $santriId)
+                ->first();
+
+            if ($kegiatan) {
+                $kegiatan->update([
+                    'jenis_kegiatan' => $jenis_kegiatan[$santriId] ?? $kegiatan->jenis_kegiatan,
+                    'status' => $status[$santriId] ?? $kegiatan->status,
+                    'catatan' => $catatan[$santriId] ?? $kegiatan->catatan,
+                    'image' => $imagePath ?? $kegiatan->image,
+                ]);
+            }
+        }
+
+        return redirect()->route('kegiatan.index')->with('success', 'Data Kegiatan berhasil diperbarui.');
+    }
+
+    public function show(Request $request, $id)
+    {
+        $jadwal = Jadwal::with('kelas', 'mapel')->findOrFail($id);
+        $kelasList = Kelas::orderBy('nama')->get(); // Ambil daftar kelas
+
+        // Ambil semua data kegiatan yang sesuai filter
+        $allKegiatan = Kegiatan::with('jadwal.kelas')
+            ->where('jadwal_id', $id)
+            ->when(
+                $request->filled('hari'),
+                fn($q) =>
+                $q->whereHas('jadwal', fn($q2) => $q2->where('hari', $request->hari))
+            )
+            ->when(
+                $request->filled('kelas_id'),
+                fn($q) =>
+                $q->whereHas('jadwal.kelas', fn($q2) => $q2->where('id', $request->kelas_id))
+            )
+            ->when(
+                $request->filled('tanggal'),
+                fn($q) =>
+                $q->whereDate('tanggal_kegiatan', $request->tanggal)
+            )
+            ->get();
+
+        // Group berdasarkan pertemuan dan tanggal
+        $grouped = $allKegiatan->groupBy(fn($item) => $item->tanggal_kegiatan);
+
+        // Buat data koleksi baru
+        $data = $grouped->map(function ($group) {
+            $first = $group->first();
+            return (object) [
+                'id' => $first->id,
+                'tanggal_kegiatan' => $first->tanggal_kegiatan,
+                'jadwal' => $first->jadwal,
+                'total_santri' => $group->count(),
+                'total_status' => $group->where('status', 'Hadir')->count(),
+            ];
+        })->values(); // Reset index
+
+        // Manual pagination
+        $page = $request->input('page', 1);
+        $perPage = 10;
+        $pagedData = new \Illuminate\Pagination\LengthAwarePaginator(
+            $data->forPage($page, $perPage),
+            $data->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $type_menu = 'kegiatan';
-        $kegiatan = kegiatan::find($id);
 
-        // arahkan ke file pages/kegiatans/edit
-        return view('pages.kegiatans.show', compact('kegiatan', 'type_menu'));
+        return view('pages.kegiatan.show', [
+            'type_menu' => $type_menu,
+            'kegiatan' => $pagedData,
+            'jadwal' => $jadwal,
+            'kelasList' => $kelasList,
+        ]);
+    }
+    public function view($id)
+    {
+        $user = Auth::user();
+        $type_menu = 'kegiatan';
+
+        // Ambil satu kegiatan sebagai referensi (tanggal & jadwal)
+        $kegiatan = Kegiatan::with('jadwal')->findOrFail($id);
+
+        // Ambil semua kegiatan yang sama (tanggal & jadwal sama)
+        $query = Kegiatan::with('santri', 'jadwal')
+            ->where('tanggal_kegiatan', $kegiatan->tanggal_kegiatan)
+            ->where('jadwal_id', $kegiatan->jadwal_id);
+
+        // Filter berdasarkan role
+        if ($user->role === 'Orang Tua') {
+            $santriId = $user->orangtua->santri_id ?? null;
+            $query->where('santri_id', $santriId);
+        }
+
+        $daftarKegiatan = $query->get();
+
+        return view('pages.kegiatan.view', [
+            'type_menu' => $type_menu,
+            'kegiatan' => $kegiatan,
+            'daftarKegiatan' => $daftarKegiatan,
+        ]);
     }
 }

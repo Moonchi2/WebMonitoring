@@ -9,6 +9,7 @@ class Kalender extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'kegiatan',
         'tanggal_awal',
         'tanggal_akhir',
         'keterangan',

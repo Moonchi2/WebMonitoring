@@ -1,14 +1,94 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda')
+@section('title', 'Dashboard')
 
-@push('styles')
-    {{-- CSS Khusus untuk mengecilkan ukuran kalender --}}
+@push('style')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/index.global.min.css" />
     <style>
-        .table-calendar th,
-        .table-calendar td {
-            padding: 0.4rem 0.2rem; /* Mengurangi padding lebih lanjut */
-            font-size: 0.78rem;     /* Mengecilkan font sedikit lagi */
+        .welcome-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .welcome-card img {
+            max-width: 120px;
+        }
+
+        .jadwal-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+        }
+
+        @media (max-width: 576px) {
+            .welcome-card img {
+                max-width: 80px;
+            }
+
+            .jadwal-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .jadwal-card .d-flex {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .jadwal-card .text-right {
+                text-align: left !important;
+            }
+        }
+
+        .calendar-container {
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+
+        .keterangan-box {
+            background: #f4f4f4;
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .keterangan-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .kegiatan-title {
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .fc .fc-toolbar-title {
+                font-size: 1.1rem;
+            }
+
+            .fc-toolbar.fc-header-toolbar {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .fc .fc-button {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            .fc .fc-daygrid-day-number {
+                font-size: 0.75rem;
+            }
+
+            .calendar-container {
+                overflow-x: auto;
+            }
         }
     </style>
 @endpush
@@ -16,196 +96,151 @@
 @section('main')
     <div class="main-content">
         <section class="section">
-            {{-- Header Sambutan --}}
-            <div class="section-header" style="background-color: #f6f6f6; border-radius: 8px; border-left: 4px solid #6777ef; padding: 15px 25px; margin-bottom: 30px;">
-                <div class="d-flex justify-content-between w-100 align-items-center">
-                    <div>
-                        <h4 class="mb-0">Selamat Datang, {{ Auth::user()->name }}!</h4>
-                        <p class="mb-0 text-muted">Anda adalah Admin Pondok Pesantren Darul Iman</p>
-                    </div>
-                    <div>
-                        <div class="badge badge-primary">Admin</div>
-                    </div>
-                </div>
+            <div class="section-header">
+                <h1>Dashboard</h1>
             </div>
-
-            <div class="section-body">
-                {{-- 🔹 Statistik Count --}}
+            @if (Auth::user()->role == 'Admin')
                 <div class="row">
-                    {{-- Card Total Santri --}}
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                        <div class="card">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-users fa-lg"></i>
+                    <!-- Statistik Cards -->
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <div class="card card-statistic-1">
+                            <div class="card-icon bg-primary"><i class="fas fa-users"></i></div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>Jumlah User</h4>
                                 </div>
-                                <div>
-                                    <div class="text-muted">Total Santri</div>
-                                    <div class="font-weight-bold" style="font-size: 1.5rem;">28</div>
-                                </div>
+                                <div class="card-body">{{ $jumlah_user }}</div>
                             </div>
                         </div>
                     </div>
-                    {{-- Card Total Wali --}}
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                        <div class="card">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-user-graduate fa-lg"></i>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <div class="card card-statistic-1">
+                            <div class="card-icon bg-success"><i class="fas fa-chalkboard-teacher"></i></div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>Jumlah Guru</h4>
                                 </div>
-                                <div>
-                                    <div class="text-muted">Total Wali</div>
-                                    <div class="font-weight-bold" style="font-size: 1.5rem;">9</div>
-                                </div>
+                                <div class="card-body">{{ $jumlah_guru }}</div>
                             </div>
                         </div>
                     </div>
-                    {{-- Card Total Kegiatan --}}
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                        <div class="card">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-book-open fa-lg"></i>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <div class="card card-statistic-1">
+                            <div class="card-icon bg-warning"><i class="fas fa-user-graduate"></i></div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>Jumlah Santri</h4>
                                 </div>
-                                <div>
-                                    <div class="text-muted">Total Kegiatan</div>
-                                    <div class="font-weight-bold" style="font-size: 1.5rem;">14</div>
+                                <div class="card-body">{{ $jumlah_santri }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <div class="card card-statistic-1">
+                            <div class="card-icon bg-danger"><i class="fas fa-book"></i></div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>Jumlah Mapel</h4>
                                 </div>
+                                <div class="card-body">{{ $jumlah_mapel }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
+            @endif
+            <div class="row">
+                <!-- Jadwal Hari Ini -->
+                <div class="col-md-8">
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                                @php $role = Auth::user()->role; @endphp
+                                <h4 class="mb-2">
+                                    @if ($role == 'Admin')
+                                        Daftar Jadwal
+                                    @elseif($role == 'Guru')
+                                        Jadwal Mengajar
+                                    @else
+                                        Jadwal Pelajaran
+                                    @endif
+                                </h4>
+                                <form method="GET" class="form-inline">
+                                    <label for="hari" class="mr-2">Hari:</label>
+                                    <select name="hari" id="hari" class="form-control"
+                                        onchange="this.form.submit()">
+                                        <option value="">Semua</option>
+                                        @foreach ($daftar_hari as $hari)
+                                            <option value="{{ $hari }}"
+                                                {{ $filterHari == $hari ? 'selected' : '' }}>
+                                                {{ ucfirst($hari) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            </div>
 
-                <div class="row">
-                    {{-- 🔹 Tabel Santri --}}
-                    <div class="col-lg-8 col-md-12">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h4>Santri</h4>
-                                <div class="card-header-form">
-                                    <form>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Search">
-                                            <div class="input-group-btn">
-                                                <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                            @if ($jadwal->isEmpty())
+                                <div class="alert alert-info">Tidak ada jadwal untuk hari
+                                    ini{{ $filterHari ? " ($filterHari)" : '' }}.
+                                </div>
+                            @else
+                                @foreach ($jadwal as $item)
+                                    @php
+                                        $hariMap = [
+                                            'Senin' => 0,
+                                            'Selasa' => 1,
+                                            'Rabu' => 2,
+                                            'Kamis' => 3,
+                                            'Jumat' => 4,
+                                            'Sabtu' => 5,
+                                            'Minggu' => 6,
+                                        ];
+                                        $indexHari = $hariMap[$item->hari] ?? 0;
+                                        $tanggalPertemuan = \Carbon\Carbon::now()
+                                            ->startOfWeek()
+                                            ->addDays($indexHari)
+                                            ->format('d-m-Y');
+                                    @endphp
+
+                                    <div class="jadwal-card">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                            <div>
+                                                <h5>{{ strtoupper(optional($item->mapel)->nama) }}</h5>
+                                                <p><i class="fas fa-calendar-day"></i> Hari: {{ ucfirst($item->hari) }}</p>
+                                                <p><i class="fas fa-clock"></i> {{ $item->jam_mulai }} -
+                                                    {{ $item->jam_selesai }} WIB
+                                                </p>
+                                                <p><i class="fas fa-users"></i> Kelas {{ optional($item->kelas)->nama }}
+                                                </p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p><i class="fas fa-calendar"></i> Tanggal: {{ $tanggalPertemuan }}</p>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
+                                @endforeach
+
+                                {{-- PAGINATION --}}
+                                <div class="mt-3">
+                                    {{ $jadwal->appends(request()->query())->links() }}
                                 </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Nama</th>
-                                                <th>Tingkatan</th>
-                                                <th>Aktifasi</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php
-                                                $santriData = [
-                                                    ['nama' => 'Nama', 'tingkatan' => 'VII', 'aktifasi' => 'Mengaji', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'IV', 'aktifasi' => 'Menghafal', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'III', 'aktifasi' => 'Mengaji', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'VI', 'aktifasi' => 'Olah raga', 'status' => 'Aktif'],
-                                                    ['nama' => 'Nama', 'tingkatan' => 'V', 'aktifasi' => 'Mengaji', 'status' => 'Aktif'],
-                                                ];
-                                            @endphp
-                                            @foreach ($santriData as $santri)
-                                            <tr>
-                                                <td>
-                                                    <img alt="image" src="{{ asset('img/avatar/avatar-1.png') }}" class="rounded-circle" width="35" data-toggle="tooltip" title="{{ $santri['nama'] }}">
-                                                    <span class="ml-2">{{ $santri['nama'] }}</span>
-                                                </td>
-                                                <td>{{ $santri['tingkatan'] }}</td>
-                                                <td>{{ $santri['aktifasi'] }}</td>
-                                                <td><div class="badge badge-success">{{ $santri['status'] }}</div></td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
+                </div>
 
-                    {{-- 🔹 Kalender --}}
-                    <div class="col-lg-4 col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Kalender</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <a href="#" class="text-primary"><i class="fas fa-chevron-left"></i></a>
-                                    <h6 class="mb-0 font-weight-bold">Agustus 2025</h6>
-                                    <a href="#" class="text-primary"><i class="fas fa-chevron-right"></i></a>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered text-center table-calendar">
-                                        <thead>
-                                            <tr>
-                                                <th>Sen</th>
-                                                <th>Sel</th>
-                                                <th>Rab</th>
-                                                <th>Kam</th>
-                                                <th>Jum</th>
-                                                <th>Sab</th>
-                                                <th>Min</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="text-muted"></td>
-                                                <td class="text-muted"></td>
-                                                <td class="text-muted"></td>
-                                                <td class="text-muted"></td>
-                                                <td>1</td>
-                                                <td>2</td>
-                                                <td>3</td>
-                                            </tr>
-                                            <tr>
-                                                <td>4</td>
-                                                <td>5</td>
-                                                <td>6</td>
-                                                <td>7</td>
-                                                <td>8</td>
-                                                <td>9</td>
-                                                <td>10</td>
-                                            </tr>
-                                            <tr>
-                                                <td>11</td>
-                                                <td>12</td>
-                                                <td>13</td>
-                                                <td>14</td>
-                                                <td>15</td>
-                                                <td>16</td>
-                                                <td>17</td>
-                                            </tr>
-                                            <tr>
-                                                <td>18</td>
-                                                <td>19</td>
-                                                <td>20</td>
-                                                <td>21</td>
-                                                <td>22</td>
-                                                <td>23</td>
-                                                <td>24</td>
-                                            </tr>
-                                            <tr>
-                                                <td>25</td>
-                                                <td>26</td>
-                                                <td>27</td>
-                                                <td>28</td>
-                                                <td>29</td>
-                                                <td>30</td>
-                                                <td>31</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                <!-- Kalender -->
+                <div class="col-md-4">
+                    <div class="card card-custom">
+                        <div class="card-header">
+                            <h6 class="text-success m-0">Kalender Kegiatan</h6>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="calendar-container" id="calendar"></div>
+
+                            <div id="eventDetails" class="keterangan-box d-none mt-3">
+                                <h5 class="kegiatan-title">Keterangan Kalender</h5>
+                                <div id="keteranganContent"></div>
                             </div>
                         </div>
                     </div>
@@ -216,5 +251,72 @@
 @endsection
 
 @push('scripts')
-    {{-- Tidak ada script khusus yang dibutuhkan untuk halaman ini --}}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const keteranganBox = document.getElementById('eventDetails');
+            const keteranganContent = document.getElementById('keteranganContent');
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                events: {!! json_encode(
+                    $kalender->map(function ($item) {
+                        return [
+                            'title' => $item->kegiatan ?? 'Kegiatan',
+                            'start' => $item->tanggal_awal,
+                            'end' => \Carbon\Carbon::parse($item->tanggal_akhir)->addDay()->toDateString(),
+                            'extendedProps' => [
+                                'keterangan' => nl2br(e($item->keterangan)),
+                                'kegiatan' => $item->kegiatan,
+                            ],
+                        ];
+                    }),
+                ) !!},
+                eventClick: function(info) {
+                    const keterangan = info.event.extendedProps.keterangan || '-';
+                    const kegiatan = info.event.extendedProps.kegiatan || info.event.title;
+
+                    keteranganContent.innerHTML = `
+                    <p><strong>Kegiatan:</strong> ${kegiatan}</p>
+                    <p><strong>Keterangan:</strong><br>${keterangan}</p>
+                `;
+                    keteranganBox.classList.remove('d-none');
+                },
+                dateClick: function(info) {
+                    const clickedDate = info.dateStr;
+
+                    // Ambil semua event dari kalender
+                    const matchedEvents = calendar.getEvents().filter(event => {
+                        const start = event.startStr;
+                        const end = event.endStr || start;
+                        return clickedDate >= start && clickedDate < end;
+                    });
+
+                    if (matchedEvents.length > 0) {
+                        let content = '';
+                        matchedEvents.forEach(event => {
+                            const kegiatan = event.extendedProps.kegiatan || event.title;
+                            const keterangan = event.extendedProps.keterangan || '-';
+
+                            content += `
+                            <div class="keterangan-item">
+                                <p><strong>Kegiatan:</strong> ${kegiatan}</p>
+                                <p><strong>Keterangan:</strong><br>${keterangan}</p>
+                                <hr>
+                            </div>
+                        `;
+                        });
+                        keteranganContent.innerHTML = content;
+                        keteranganBox.classList.remove('d-none');
+                    } else {
+                        keteranganBox.classList.add('d-none');
+                    }
+                }
+            });
+
+            calendar.render();
+        });
+    </script>
 @endpush

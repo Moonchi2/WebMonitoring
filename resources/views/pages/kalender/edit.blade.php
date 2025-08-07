@@ -16,7 +16,11 @@
                     <div class="card">
                         <div class="card-body">
                             @include('layouts.alert')
-
+                            <div class="form-group">
+                                <label for="kegiatan">Nama Kegiatan</label>
+                                <input type="text" name="kegiatan" class="form-control" value="{{ old('kegiatan', $kalender->tanggal_awal) }}"
+                                    required>
+                            </div>
                             <div class="form-group">
                                 <label for="tanggal_awal">Tanggal Awal</label>
                                 <input type="date" name="tanggal_awal" class="form-control"
@@ -31,7 +35,7 @@
 
                             <div class="form-group">
                                 <label for="keterangan">Keterangan</label>
-                                 <textarea name="keterangan" class="form-control" rows="3" required>{{ old('keterangan', $kalender->keterangan) }}</textarea>
+                                <textarea name="keterangan" class="form-control" rows="3" required>{{ old('keterangan', $kalender->keterangan) }}</textarea>
                             </div>
                         </div>
 

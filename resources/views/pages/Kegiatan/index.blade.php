@@ -3,147 +3,124 @@
 @section('title', 'Kegiatan')
 
 @push('style')
-    <!-- CSS Libraries -->
-    <link rel="stylesheet" href="{{ asset('library/d') }}">
+    <!-- Tambahkan CSS tambahan jika diperlukan -->
 @endpush
 
 @section('main')
-    {{-- @if (Auth::user()->role == 'Admin') --}}
-        <div class="main-content">
-            <section class="section">
-                <div class="section-body">
-                    <div class="row">
-                        <div class="col-12">
-                            @include('layouts.alert')
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Data kegiatan</h4>
-                                </div>
-                                <div class="card-body">
-                                    {{-- Filter & Tambah --}}
-                                    <div class="mb-3">
-                                        <div class="row align-items-end">
-                                            <div class="col-md-2 mb-2">
-                                                <a href="{{ route('kegiatan.create') }}" class="btn btn-primary w-100">
-                                                    <i class="fas fa-plus"></i> Tambah
-                                                </a>
-                                            </div>
-                                            <div class="col-md-10">
-                                                <form action="{{ route('kegiatan.index') }}" method="GET">
-                                                    <div class="form-row row">
-                                                        <div class="col-md-2 mb-2">
-                                                        </div>
-                                                        <div class="col-md-3 mb-2">
-                                                            <input type="text" name="name" class="form-control"
-                                                                placeholder="Cari Nama kegiatan" value="{{ request('name') }}">
-                                                        </div>
-                                                        <div class="col-md-1 mb-2">
-                                                            <button class="btn btn-primary w-100" type="submit">
-                                                                <i class="fas fa-search"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
+    <div class="main-content">
+        <section class="section">
+            @include('layouts.alert')
+            <div class="section-header">
+                <h1>Kegiatan</h1>
+            </div>
 
-                                    <div class="clearfix  divider mb-3"></div>
-
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-bordered table-lg" id="table-1">
-                                            <tr>
-                                                <th style="width: 3%">No</th>
-                                                <th class="text-center">Image</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Role</th>
-                                                <th style="width: 5%" class="text-center">Action</th>
-                                            </tr>
-                                            @foreach ($kegiatans as $index => $kegiatan)
-                                                <tr>
-                                                    <td>
-                                                        {{ $kegiatans->firstItem() + $index }}
-                                                        {{ $kegiatans->jadwal->guru->user->name}}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <img alt="image"
-                                                            src="{{ $kegiatan->image ? asset('img/kegiatan/' . $kegiatan->image) : asset('img/avatar/avatar-1.png') }}"
-                                                            class="rounded-circle" width="35" height="35"
-                                                            data-toggle="tooltip" title="avatar">
-                                                    </td>
-                                                    <td>
-                                                        {{ $kegiatan->name }}
-                                                    </td>
-                                                    <td>
-                                                        {{ $kegiatan->email }}
-                                                    </td>
-                                                    <td>
-                                                        {{ $kegiatan->role }}
-                                                    </td>
-                                                    <td text='text-center'>
-                                                        <div class="d-flex justify-content-center">
-                                                            <a href="{{ route('kegiatan.edit', $kegiatan) }}"
-                                                                class="btn btn-sm btn-icon btn-primary m-1"
-                                                                data-bs-toggle="tooltip" title="Edit"><i
-                                                                    class="fas fa-edit"></i></a>
-                                                            <a href="{{ route('kegiatan.show', $kegiatan) }}"
-                                                                class="btn btn-sm btn-icon btn-info m-1"
-                                                                data-bs-toggle="tooltip" title="Lihat"><i
-                                                                    class="fas fa-eye"></i></a>
-                                                            <form action="{{ route('kegiatan.destroy', $kegiatan) }}"
-                                                                method="post">
-                                                                @csrf
-                                                                @method('delete')
-                                                                <button
-                                                                    class="btn btn-sm btn-icon m-1 btn-danger confirm-delete "
-                                                                    data-bs-toggle="tooltip" title="Hapus">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </table>
-                                        <div class="card-footer d-flex justify-content-between">
-                                            <span>
-                                                Showing {{ $kegiatans->firstItem() }}
-                                                to {{ $kegiatans->lastItem() }}
-                                                of {{ $kegiatans->total() }} entries
-                                            </span>
-                                            <div class="paginate-sm">
-                                                {{ $kegiatans->onEachSide(0)->links() }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+            <div class="section-body">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <form method="GET" action="{{ route('kegiatan.index') }}" class="form-inline">
+                            <div class="input-group mr-2">
+                                <input type="text" name="q" class="form-control" placeholder="Cari guru atau mapel"
+                                    value="{{ $searchQuery }}">
                             </div>
+
+                            @if (Auth::user()->role != 'Siswa')
+                                <div class="input-group mr-2">
+                                    <select name="kelas_id" class="form-control">
+                                        <option value="">-- Semua Kelas --</option>
+                                        @foreach ($kelasList as $kelas)
+                                            <option value="{{ $kelas->id }}"
+                                                {{ $selectedKelas == $kelas->id ? 'selected' : '' }}>
+                                                {{ $kelas->nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+
+                            <div class="input-group mr-2">
+                                <select name="hari" class="form-control">
+                                    <option value="">-- Semua Hari --</option>
+                                    @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $day)
+                                        <option value="{{ $day }}" {{ $selectedHari == $day ? 'selected' : '' }}>
+                                            {{ $day }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i> Filter
+                                </button>
+                                <a href="{{ route('kegiatan.index') }}" class="btn btn-warning ml-2">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    @if (Auth::user()->role != 'Guru')
+                                        <th>Nama Guru</th>
+                                    @endif
+                                    <th>Mata Pelajaran</th>
+                                    <th>Kelas</th>
+                                    <th>Hari</th>
+                                    <th>Jam Mengajar</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($jadwals as $index => $item)
+                                    <tr>
+                                        <td>{{ $jadwals->firstItem() + $index }}</td>
+
+                                        @if (Auth::user()->role != 'Guru')
+                                            <td>{{ $item->guru->user->name ?? '-' }}</td>
+                                        @endif
+
+                                        <td>{{ $item->mapel->nama ?? '-' }}</td>
+                                        <td>{{ $item->kelas->nama ?? '-' }}</td>
+                                        <td>{{ $item->hari }}</td>
+                                        <td>{{ $item->jam_mulai }} - {{ $item->jam_selesai }}</td>
+                                        <td class="text-center">
+                                            @if (Auth::user()->role == 'Admin' || Auth::user()->role == 'Guru')
+                                                <a href="{{ route('kegiatan.add', $item) }}"
+                                                    class="btn btn-sm btn-icon btn-success m-1" title="Add kegiatan Manual">
+                                                    <i class="fas fa-plus"></i>
+                                                </a>
+                                            @endif
+
+                                            @if (Auth::user()->role == 'Admin' || Auth::user()->role == 'Guru' || Auth::user()->role == 'Orang Tua' )
+                                                <a href="{{ route('kegiatan.show', $item->id) }}"
+                                                    class="btn btn-sm btn-icon btn-info m-1" title="Lihat kegiatan">
+                                                    <i class="fas fa-list"></i>
+                                                </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center">Tidak ada data Jadwal kegiatansi.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between">
+                        <div>
+                            Menampilkan {{ $jadwals->firstItem() }} - {{ $jadwals->lastItem() }} dari
+                            {{ $jadwals->total() }} data
+                        </div>
+                        <div>
+                            {{ $jadwals->withQueryString()->links('pagination::bootstrap-4') }}
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
-    {{-- @else
-        <div class="alert alert-danger">
-            User role Anda tidak mendapatkan izin.
-        </div>
-    @endif --}}
-
+            </div>
+        </section>
+    </div>
 @endsection
-
-@push('scripts')
-    <!-- JS Libraies -->
-    <script src="{{ asset('library/datatables/media/js/jquery.dataTables.min.js') }}"></script>
-    {{-- <script src="{{ asset() }}"></script> --}}
-    {{-- <script src="{{ asset() }}"></script> --}}
-    <script src="{{ asset('library/jquery-ui-dist/jquery-ui.min.js') }}"></script>
-
-    <!-- Page Specific JS File -->
-    <script src="{{ asset('js/page/modules-datatables.js') }}"></script>
-    <script src="{{ asset('js/page/components-table.js') }}"></script>
-@endpush

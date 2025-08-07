@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('jenis_kelamin');
             $table->string('nip');
-            $table->integer('no_telepon');
+            $table->string('no_telepon');
             $table->timestamps();
         });
     }

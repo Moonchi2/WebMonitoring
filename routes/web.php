@@ -25,13 +25,23 @@ Route::middleware(['auth'])->group(function () {
   Route::post('/profile/update/{user}', [ProfileController::class, 'update'])->name('profile.update');
   Route::get('profile/change-password', [ProfileController::class, 'changePasswordForm'])->name('profile.change-password-form');
   Route::post('profile/change-password/{user}', [ProfileController::class, 'changePassword'])->name('profile.change-password');
+  // kalender
   Route::resource('kalender', KalenderController::class);
+  // kegiatan
+  Route::get('/kegiatan/add/{kegiatan}', [KegiatanController::class, 'add'])->name('kegiatan.add');
+  Route::post('/kegiatan/add/{kegiatan}', [KegiatanController::class, 'store'])->name('kegiatan.store');
+  Route::get('/kegiatan/{id}/view/', [KegiatanController::class, 'view'])->name('kegiatan.view');
   Route::resource('kegiatan', KegiatanController::class);
+  //  guru
   Route::resource('guru', GuruController::class);
+  // jadwal
   Route::resource('jadwal', JadwalController::class);
+  // kelas
   Route::resource('kelas', KelasController::class)->parameters([
     'kelas' => 'kelas'
   ]);
+  // mata pelajaran
   Route::resource('matapelajaran', MataPelajaranController::class);
+  // santri
   Route::resource('santri', SantriController::class);
 });
