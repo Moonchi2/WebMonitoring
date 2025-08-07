@@ -39,6 +39,7 @@
                             <thead class="text-center">
                                 <tr>
                                     <th>No</th>
+                                    <th>Nama kegiatan</th>
                                     <th>Tanggal Awal</th>
                                     <th>Tanggal Akhir</th>
                                     <th>Keterangan</th>
@@ -49,6 +50,7 @@
                                 @forelse ($kalender as $index => $item)
                                     <tr>
                                         <td class="text-center">{{ $kalender->firstItem() + $index }}</td>
+                                        <td>{{ $item->nama_kegiatan }}</td>
                                         <td class="text-center">
                                             {{ \Carbon\Carbon::parse($item->tanggal_awal)->format('d-m-Y') }}</td>
                                         <td class="text-center">
